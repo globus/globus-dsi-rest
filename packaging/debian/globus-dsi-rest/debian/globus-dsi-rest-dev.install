@@ -1,0 +1,4 @@
+#! /usr/bin/dh-exec
+usr/lib/*/libglobus_dsi_rest.so
+usr/lib/*/pkgconfig/globus-dsi-rest.pc
+usr/include/globus/*.h

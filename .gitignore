@@ -1,0 +1,14 @@
+aclocal.m4
+autom4te.cache
+m4/libtool.m4
+m4/lt*.m4
+build-aux
+build
+configure
+Makefile.in
+Doxyfile
+*.o
+*.lo
+*.la
+.*.sw*
+TAGS

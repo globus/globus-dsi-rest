@@ -1,0 +1,5 @@
+globus-dsi-rest (0.0-1+gt6.@distro@) @distro@; urgency=low
+
+  * Initial packaging
+
+ -- Globus Toolkit <support@globus.org>  Mon, 13 Jun 2016 10:02:03 -0400

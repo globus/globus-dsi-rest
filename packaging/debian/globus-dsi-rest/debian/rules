@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+# export DH_VERBOSE = 1
+
+# see EXAMPLES in dpkg-buildflags(1) and read /usr/share/dpkg/*
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-silent-rules -q --disable-static --includedir='$${prefix}/include/globus' --docdir='$${prefix}/share/doc/globus-dsi-rest'
+
+override_dh_strip:
+	dh_strip --dbg-package=globus-dsi-rest-dbg
+
+# main packaging script based on dh7 syntax
+%:
+	dh $@  --with autotools-dev
+
+.PHONY: override_dh_auto_configure override_dh_strip

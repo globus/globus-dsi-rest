@@ -1,0 +1,21 @@
+- Partial transfers with gridftp_op functions
+  Currently the GridFTP op specializations will process the entire control
+  data steam. If we want to support things S3 multpart uploads or Google Drive
+  resumable uploads, we'll need to read only part of the data channel per REST
+  request.  This will be made much easier if we have the ordered data channel
+  support in the GridFTP server. This is not needed for Google Drive API alpha1
+
+- Thread handling
+  In the case that a DSI wants to process multiple non-blocking operations
+  simultaneously, it might be more efficient to use the curl multi
+  handle/select loop to handle them all without requiring a thread per
+  operation.
+
+- Context Sharing 
+  libcurl has data sharing between CURL handles (cookies, DNS, SSL sessions).
+  It looks reasonably easy to implement, and may provide performance
+  improvements.
+
+- Test cases
+  Some of the tests with the embedded XIO HTTP server occasionally fail. 
+  I suspect some problem with the xio side, but am not certain.
