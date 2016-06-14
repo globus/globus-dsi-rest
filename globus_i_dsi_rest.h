@@ -292,7 +292,7 @@ enum
     globus_error_construct_error( \
         GLOBUS_DSI_REST_MODULE, \
         NULL, \
-        GLOBUS_DSI_REST_ERROR_CURL, \
+        GLOBUS_DSI_REST_ERROR_JSON, \
         __FILE__, \
         __func__, \
         __LINE__, \
