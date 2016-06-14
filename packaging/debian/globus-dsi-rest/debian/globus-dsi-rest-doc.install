@@ -1,3 +1,0 @@
-#! /usr/bin/dh-exec
-usr/share/doc/globus-dsi-rest/*
-usr/share/man/man3/*
