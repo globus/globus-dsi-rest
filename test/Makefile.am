@@ -9,8 +9,9 @@ check_PROGRAMS = \
 	handle-get-test \
 	handle-release-test \
 	progress-idle-timeout-test \
-	request-test \
 	read-json-test \
+	request-test \
+	response-test \
 	set-request-test \
 	write-block-test \
 	write-form-test \
@@ -38,6 +39,7 @@ TESTS = $(check_PROGRAMS) \
 	globus-dsi-rest-gridftp-test.pl
 
 AM_CPPFLAGS = \
+	-I $(top_srcdir) \
 	$(GLOBUS_GRIDFTP_SERVER_CFLAGS) \
 	$(GLOBUS_COMMON_CFLAGS) \
 	$(LIBCURL_CPPFLAGS) \
@@ -63,6 +65,9 @@ read_json_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 request_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 request_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
+
+response_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
+response_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 write_block_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 write_block_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)

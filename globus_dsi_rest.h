@@ -531,6 +531,37 @@ extern globus_dsi_rest_read_t const     globus_dsi_rest_read_gridftp_op;
  */
 extern globus_dsi_rest_progress_t const globus_dsi_rest_progress_idle_timeout;
 
+typedef
+struct globus_dsi_rest_response_info_s
+{
+    int                                 response_code;
+    globus_dsi_rest_key_array_t         desired_headers;
+}
+globus_dsi_rest_response_info_t;
+
+/**
+ * @brief Response parsing specialization of globus_dsi_rest_response_t
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     This function implements the globus_dsi_rest_response_t interface
+ *     and is intended to be used to provide the HTTP status value and
+ *     values of certain headers. This is intended to be used when
+ *     a application wants to receive the response code and specific header
+ *     values without having to implement callbacks.
+ *
+ *     The response_callback_arg used with this function <b>MUST BE</b> a
+ *     pointer to a globus_dsi_rest_response_info_t structure, with the
+ *     desired_headers array initialized with a count and a key_value array
+ *     containing only the key values initialized to the names of the headers
+ *     that the application wants filled in.
+ *
+ *     When this function is used, the response_code will be set to the HTTP
+ *     response code, and the values in the desired_headers.key_value array
+ *     will be updated for each of the keys which was present in the HTTP
+ *     response.
+ */
+extern globus_dsi_rest_response_t const globus_dsi_rest_response;
+
 extern globus_module_descriptor_t       globus_i_dsi_rest_module;
 
 #define GLOBUS_DSI_REST_MODULE (&globus_i_dsi_rest_module)
