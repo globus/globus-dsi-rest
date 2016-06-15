@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>globus_dsi_rest: Data Structure Index</title>
+<title>globus_dsi_rest: globus_dsi_rest_response_arg_s Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -64,11 +64,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
-      <li class="current"><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -83,20 +82,60 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">Data Structure Index</div>  </div>
+<div class="title">globus_dsi_rest_response_arg_s Struct Reference<div class="ingroups"><a class="el" href="group__globus__dsi__rest__callback__specializations.html">Callback Specializations</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="qindex"><a class="qindex" href="#letter_R">R</a></div>
-<table style="margin: 10px; white-space: nowrap;" align="center" width="95%" border="0" cellspacing="0" cellpadding="0">
-<tr><td rowspan="2" valign="bottom"><a name="letter_r"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;r&#160;&#160;</div></td></tr></table>
-</td><td valign="top"><a class="el" href="structglobus__dsi__rest__key__value__s.html">globus_dsi_rest_key_value_s</a>&#160;&#160;&#160;</td><td valign="top"><a class="el" href="structglobus__dsi__rest__write__block__arg__s.html">globus_dsi_rest_write_block_arg_s</a>&#160;&#160;&#160;</td></tr>
-<tr><td valign="top"><a class="el" href="structglobus__dsi__rest__response__arg__s.html">globus_dsi_rest_response_arg_s</a>&#160;&#160;&#160;</td><td></td></tr>
-<tr><td valign="top"><a class="el" href="structglobus__dsi__rest__key__array__s.html">globus_dsi_rest_key_array_s</a>&#160;&#160;&#160;</td><td></td><td></td></tr>
-<tr><td></td><td></td><td></td></tr>
+
+<p>Response specialization response_callback_arg.  
+ <a href="structglobus__dsi__rest__response__arg__s.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="globus__dsi__rest_8h_source.html">globus_dsi_rest.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Data Fields</h2></td></tr>
+<tr class="memitem:adb426ef2fc25ab9a33207ec786804823"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__response__arg__s.html#adb426ef2fc25ab9a33207ec786804823">response_code</a></td></tr>
+<tr class="separator:adb426ef2fc25ab9a33207ec786804823"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a518d813320550f03f89e293056bff32f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__globus__dsi__rest__data.html#ga33ced6c9e430229bd03adf9622be398c">globus_dsi_rest_key_array_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__response__arg__s.html#a518d813320550f03f89e293056bff32f">desired_headers</a></td></tr>
+<tr class="separator:a518d813320550f03f89e293056bff32f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<div class="qindex"><a class="qindex" href="#letter_R">R</a></div>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Response specialization response_callback_arg. </p>
+<p>A pointer to a data structure of this type must be be used as the response_callback_arg parameter when using the globus_dsi_rest_response function as the response_callback to <a class="el" href="group__globus__dsi__rest__api.html#ga5ae1accec863cf4177e64aa55cdf56e3" title="Perform a REST request. ">globus_dsi_rest_request()</a>. </p>
+</div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="a518d813320550f03f89e293056bff32f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__globus__dsi__rest__data.html#ga33ced6c9e430229bd03adf9622be398c">globus_dsi_rest_key_array_t</a> globus_dsi_rest_response_arg_s::desired_headers</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Array of header names is updated by globus_dsi_rest_response with their values if present, or NULL if not </p>
+
+</div>
+</div>
+<a class="anchor" id="adb426ef2fc25ab9a33207ec786804823"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int globus_dsi_rest_response_arg_s::response_code</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Value of the HTTP response code </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>/media/psf/Home/development/globus-dsi-rest/source/<a class="el" href="globus__dsi__rest_8h_source.html">globus_dsi_rest.h</a></li>
+</ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

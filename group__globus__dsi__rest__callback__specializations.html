@@ -91,12 +91,18 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__write__block__arg__s.html">globus_dsi_rest_write_block_arg_s</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Single-block write specialization data_write_callback_arg.  <a href="structglobus__dsi__rest__write__block__arg__s.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__response__arg__s.html">globus_dsi_rest_response_arg_s</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Response specialization response_callback_arg.  <a href="structglobus__dsi__rest__response__arg__s.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:ga3d523b818dd363dd5987120462876411"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structglobus__dsi__rest__write__block__arg__s.html">globus_dsi_rest_write_block_arg_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__globus__dsi__rest__callback__specializations.html#ga3d523b818dd363dd5987120462876411">globus_dsi_rest_write_block_arg_t</a></td></tr>
 <tr class="memdesc:ga3d523b818dd363dd5987120462876411"><td class="mdescLeft">&#160;</td><td class="mdescRight">Single-block write specialization data_write_callback_arg.  <a href="#ga3d523b818dd363dd5987120462876411">More...</a><br /></td></tr>
 <tr class="separator:ga3d523b818dd363dd5987120462876411"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0bc03b437c5121c194bb96fbf578283e"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structglobus__dsi__rest__response__arg__s.html">globus_dsi_rest_response_arg_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__globus__dsi__rest__callback__specializations.html#ga0bc03b437c5121c194bb96fbf578283e">globus_dsi_rest_response_arg_t</a></td></tr>
+<tr class="memdesc:ga0bc03b437c5121c194bb96fbf578283e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Response specialization response_callback_arg.  <a href="#ga0bc03b437c5121c194bb96fbf578283e">More...</a><br /></td></tr>
+<tr class="separator:ga0bc03b437c5121c194bb96fbf578283e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -127,6 +133,22 @@ Variables</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <h2 class="groupheader">Typedef Documentation</h2>
+<a class="anchor" id="ga0bc03b437c5121c194bb96fbf578283e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structglobus__dsi__rest__response__arg__s.html">globus_dsi_rest_response_arg_s</a>
+ <a class="el" href="group__globus__dsi__rest__callback__specializations.html#ga0bc03b437c5121c194bb96fbf578283e">globus_dsi_rest_response_arg_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Response specialization response_callback_arg. </p>
+<p>A pointer to a data structure of this type must be be used as the response_callback_arg parameter when using the globus_dsi_rest_response function as the response_callback to <a class="el" href="group__globus__dsi__rest__api.html#ga5ae1accec863cf4177e64aa55cdf56e3" title="Perform a REST request. ">globus_dsi_rest_request()</a>. </p>
+
+</div>
+</div>
 <a class="anchor" id="ga3d523b818dd363dd5987120462876411"></a>
 <div class="memitem">
 <div class="memproto">
@@ -204,7 +226,7 @@ Variables</h2></td></tr>
 
 <p>Response parsing specialization of globus_dsi_rest_response_t. </p>
 <p>This function implements the globus_dsi_rest_response_t interface and is intended to be used to provide the HTTP status value and values of certain headers. This is intended to be used when a application wants to receive the response code and specific header values without having to implement callbacks.</p>
-<p>The response_callback_arg used with this function <b>MUST BE</b> a pointer to a globus_dsi_rest_response_info_t structure, with the desired_headers array initialized with a count and a key_value array containing only the key values initialized to the names of the headers that the application wants filled in.</p>
+<p>The response_callback_arg used with this function <b>MUST BE</b> a pointer to a globus_dsi_rest_response_arg_t structure, with the desired_headers array initialized with a count and a key_value array containing only the key values initialized to the names of the headers that the application wants filled in.</p>
 <p>When this function is used, the response_code will be set to the HTTP response code, and the values in the desired_headers.key_value array will be updated for each of the keys which was present in the HTTP response. </p>
 
 </div>
