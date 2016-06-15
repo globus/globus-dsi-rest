@@ -6,7 +6,8 @@ var indexSectionsWithContent =
   3: "g",
   4: "bcgkv",
   5: "g",
-  6: "acd"
+  6: "acd",
+  7: "g"
 };
 
 var indexSectionNames =
@@ -17,7 +18,8 @@ var indexSectionNames =
   3: "functions",
   4: "variables",
   5: "typedefs",
-  6: "groups"
+  6: "groups",
+  7: "pages"
 };
 
 var indexSectionLabels =
@@ -28,6 +30,7 @@ var indexSectionLabels =
   3: "Functions",
   4: "Variables",
   5: "Typedefs",
-  6: "Modules"
+  6: "Modules",
+  7: "Pages"
 };
 
