@@ -531,13 +531,26 @@ extern globus_dsi_rest_read_t const     globus_dsi_rest_read_gridftp_op;
  */
 extern globus_dsi_rest_progress_t const globus_dsi_rest_progress_idle_timeout;
 
+
+/**
+ * @brief Response specialization response_callback_arg
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     A pointer to a data structure of this type must be be used as the
+ *     response_callback_arg parameter when using the
+ *     globus_dsi_rest_response function as the response_callback
+ *     to globus_dsi_rest_request().
+ */
 typedef
-struct globus_dsi_rest_response_info_s
+struct globus_dsi_rest_response_arg_s
 {
+    /** Value of the HTTP response code */
     int                                 response_code;
+    /** Array of header names is updated by globus_dsi_rest_response with
+     * their values if present, or NULL if not */
     globus_dsi_rest_key_array_t         desired_headers;
 }
-globus_dsi_rest_response_info_t;
+globus_dsi_rest_response_arg_t;
 
 /**
  * @brief Response parsing specialization of globus_dsi_rest_response_t
@@ -550,7 +563,7 @@ globus_dsi_rest_response_info_t;
  *     values without having to implement callbacks.
  *
  *     The response_callback_arg used with this function <b>MUST BE</b> a
- *     pointer to a globus_dsi_rest_response_info_t structure, with the
+ *     pointer to a globus_dsi_rest_response_arg_t structure, with the
  *     desired_headers array initialized with a count and a key_value array
  *     containing only the key values initialized to the names of the headers
  *     that the application wants filled in.

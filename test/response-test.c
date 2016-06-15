@@ -280,8 +280,9 @@ int main()
         char uri_fmt[] = "http://%s%s";
         size_t uri_len = strlen(contact_string) + sizeof(uri_fmt) + strlen(tests[i].uri_pattern);
         char uri[uri_len+1];
-        globus_dsi_rest_response_info_t     response_info = {
-                .desired_headers = tests[i].desired_headers
+        globus_dsi_rest_response_arg_t  response_arg =
+        {
+            .desired_headers = tests[i].desired_headers
         };
 
         snprintf(uri, sizeof(uri), uri_fmt, contact_string, tests[i].uri_pattern);
@@ -294,7 +295,7 @@ int main()
             &(globus_dsi_rest_callbacks_t)
             {
                 .response_callback = globus_dsi_rest_response,
-                .response_callback_arg = &response_info,
+                .response_callback_arg = &response_arg,
             });
 
         if (result != GLOBUS_SUCCESS)
@@ -303,17 +304,17 @@ int main()
             fprintf(stderr, "request result: %s\n", errstr);
             ok = transport_ok = false;
         }
-        if (tests[i].response_code != response_info.response_code)
+        if (tests[i].response_code != response_arg.response_code)
         {
             ok = response_ok = false;
         }
-        for (size_t j = 0; j < response_info.desired_headers.count; j++)
+        for (size_t j = 0; j < response_arg.desired_headers.count; j++)
         {
-            if (strcasecmp(response_info.desired_headers.key_value[j].key, "location") == 0)
+            if (strcasecmp(response_arg.desired_headers.key_value[j].key, "location") == 0)
             {
                 if (tests[i].location == NULL)
                 {
-                    if (response_info.desired_headers.key_value[j].value != NULL)
+                    if (response_arg.desired_headers.key_value[j].value != NULL)
                     {
                         ok = headers_ok = false;
                     }
@@ -321,7 +322,7 @@ int main()
                 else
                 {
                     if (strcmp(
-                                response_info.desired_headers.key_value[j].value,
+                                response_arg.desired_headers.key_value[j].value,
                                 tests[i].location) != 0)
                     {
                         ok = headers_ok = false;
@@ -330,7 +331,7 @@ int main()
             }
             else
             {
-                if (response_info.desired_headers.key_value[j].value != NULL)
+                if (response_arg.desired_headers.key_value[j].value != NULL)
                 {
                     ok = headers_ok = false;
                 }

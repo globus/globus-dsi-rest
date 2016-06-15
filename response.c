@@ -30,17 +30,17 @@ globus_l_dsi_rest_response(
     const char                         *response_status,
     const globus_dsi_rest_key_array_t  *response_headers)
 {
-    globus_dsi_rest_response_info_t    *response_info = response_callback_arg;
+    globus_dsi_rest_response_arg_t     *response_arg = response_callback_arg;
     globus_result_t                     result = GLOBUS_SUCCESS;
 
     GlobusDsiRestEnter();
 
-    response_info->response_code = response_code;
+    response_arg->response_code = response_code;
 
-    for (size_t i = 0; i < response_info->desired_headers.count; i++)
+    for (size_t i = 0; i < response_arg->desired_headers.count; i++)
     {
         globus_dsi_rest_key_value_t    *desired;
-        desired = &response_info->desired_headers.key_value[i]; 
+        desired = &response_arg->desired_headers.key_value[i]; 
         desired->value = NULL;
 
         for (size_t j = 0; j < response_headers->count; j++)
