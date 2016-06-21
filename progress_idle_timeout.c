@@ -37,10 +37,15 @@ globus_l_dsi_rest_progress_idle_timeout(
     uintptr_t                           idle_msec;
 
     GlobusTimeAbstimeGetCurrent(now);
-    if (amt_read != 0 || amt_written != 0)
+    if (amt_read != idle_arg->last_amt_read)
     {
+        idle_arg->last_amt_read = amt_read;
         idle_arg->last_activity = now;
-        return GLOBUS_SUCCESS;
+    }
+    if (amt_written != idle_arg->last_amt_written)
+    {
+        idle_arg->last_amt_written = amt_written;
+        idle_arg->last_activity = now;
     }
     GlobusTimeAbstimeDiff(idle, now, idle_arg->last_activity);
 
