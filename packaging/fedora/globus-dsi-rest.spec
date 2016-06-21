@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.2
+Version:	0.3
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -129,6 +129,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Tue Jun 21 2016 Globus Toolkit <support@globus.org> - 0.2-1
 - Add dependency on perl-Test-Simple
+- Add GLOBUS_HOSTNAME=localhost to test environment
 
 * Wed Jun  8 2016 Globus Toolkit <support@globus.org> - 0.0-1
 - Initial package

@@ -28,6 +28,7 @@ TESTS_ENVIRONMENT = \
     X509_USER_PROXY=/dev/null \
     X509_CERT_DIR="$(X509_CERT_DIR)" \
     LIBTOOL="$(LIBTOOL)" \
+    GLOBUS_HOSTNAME="localhost" \
     GRIDMAP="$(GRIDMAP)" ;
 
 TEST_EXTENSIONS = .pl
