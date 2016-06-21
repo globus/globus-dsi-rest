@@ -71,7 +71,7 @@ globus_l_dsi_rest_perform_thread(
             request->callbacks.complete_callback_arg,
             (result!=GLOBUS_SUCCESS) ? result : request->result);
 
-    free(request);
+    globus_i_dsi_rest_request_cleanup(request);
 
     return NULL;
 }
@@ -104,6 +104,17 @@ globus_l_dsi_rest_perform(
      * TODO: If using the gridftp_op functions, wait for blocks to return from
      * GridFTP server
      */
+    if (request->callbacks.data_read_callback == globus_dsi_rest_read_gridftp_op)
+    {
+        globus_mutex_lock(&request->gridftp_op_arg.mutex);
+        while (request->gridftp_op_arg.registered_buffers != NULL)
+        {
+            globus_cond_wait(
+                    &request->gridftp_op_arg.cond,
+                    &request->gridftp_op_arg.mutex);
+        }
+        globus_mutex_unlock(&request->gridftp_op_arg.mutex);
+    }
 
 perform_fail:
     if (request->result == GLOBUS_SUCCESS)

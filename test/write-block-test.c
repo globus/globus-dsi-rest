@@ -42,7 +42,7 @@ struct test_case                        tests[] =
     {
         .method = "PUT",
         .uri_pattern = "/write-block-test/put",
-        .response_code = 201,
+        .response_code = 204,
         .upload_body = "data",
     },
     {
@@ -196,10 +196,14 @@ void *server_thread(void *arg)
                     test->server_read_offset += nbytes;
                     if (result != GLOBUS_SUCCESS)
                     {
-                        if (globus_xio_driver_error_match(
-                                http_driver,
+                        if (globus_error_match(
                                 globus_error_peek(result),
-                                GLOBUS_XIO_HTTP_ERROR_EOF) == 0)
+                                GLOBUS_XIO_MODULE,
+                                GLOBUS_XIO_ERROR_EOF)
+                            || globus_xio_driver_error_match(
+                                    http_driver,
+                                    globus_error_peek(result),
+                                    GLOBUS_XIO_HTTP_ERROR_EOF))
                         {
                             result = GLOBUS_SUCCESS;
                             break;
@@ -245,12 +249,6 @@ void *server_thread(void *arg)
                         strlen(download_body),
                         strlen(download_body),
                         &nbytes, NULL);
-            }
-            else
-            {
-                result = globus_xio_handle_cntl(xio_handle,
-                        http_driver,
-                        GLOBUS_XIO_HTTP_HANDLE_SET_END_OF_ENTITY);
             }
 
 

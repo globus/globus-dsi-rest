@@ -283,6 +283,8 @@ int main()
         {
             ok = download_ok = false;
         }
+        json_decref(json);
+        json_decref(json_out.json);
 
         printf("%s %zu - %s %s%s\n",
                 ok?"ok":"not ok",
@@ -296,6 +298,9 @@ int main()
         }
     }
 
+    free(contact_string);
+    globus_module_deactivate(GLOBUS_DSI_REST_MODULE);
+    globus_module_deactivate(GLOBUS_XIO_MODULE);
     curl_global_cleanup();
     return rc;
 }

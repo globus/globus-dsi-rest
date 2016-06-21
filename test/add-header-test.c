@@ -79,6 +79,7 @@ main()
         }
     }
 
+    globus_module_deactivate(GLOBUS_DSI_REST_MODULE);
     return rc;
 }
 /* main() */

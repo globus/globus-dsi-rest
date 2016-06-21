@@ -105,6 +105,7 @@ struct globus_i_dsi_rest_request_s
     globus_thread_t                     thread;
 
     globus_dsi_rest_write_block_arg_t   write_block_callback_arg;
+    globus_dsi_rest_write_block_arg_t   write_block_callback_arg_orig;
     globus_i_dsi_rest_read_json_arg_t   read_json_arg;
     globus_i_dsi_rest_gridftp_op_arg_t  gridftp_op_arg;
     globus_i_dsi_rest_idle_arg_t        idle_arg;
@@ -187,6 +188,10 @@ globus_i_dsi_rest_uri_escape(
     const char                         *raw,
     char                              **encodedp,
     size_t                             *availablep);
+
+void
+globus_i_dsi_rest_request_cleanup(
+    globus_i_dsi_rest_request_t        *request);
 
 /* Callbacks that are passed to libcurl that cause user-specific callbacks */
 int

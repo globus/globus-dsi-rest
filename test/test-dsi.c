@@ -265,11 +265,16 @@ globus_l_dsi_rest_thread(
                     }
                     if (result != GLOBUS_SUCCESS)
                     {
-                        if (globus_xio_driver_error_match(
-                                dsi_rest_handle->http_driver,
+                        if (globus_error_match(
                                 globus_error_peek(result),
-                                GLOBUS_XIO_HTTP_ERROR_EOF) == 0)
+                                GLOBUS_XIO_MODULE,
+                                GLOBUS_XIO_ERROR_EOF)
+                            || globus_xio_driver_error_match(
+                                    dsi_rest_handle->http_driver,
+                                    globus_error_peek(result),
+                                    GLOBUS_XIO_HTTP_ERROR_EOF))
                         {
+                            result = GLOBUS_SUCCESS;
                             break;
                         }
                         else

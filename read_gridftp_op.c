@@ -45,6 +45,7 @@ globus_l_dsi_rest_read_gridftp_op(
     size_t                              buffer_length)
 {
     globus_i_dsi_rest_gridftp_op_arg_t *gridftp_op_arg = read_callback_arg;
+    bool                                eof = (buffer_length == 0);
     globus_result_t                     result = GLOBUS_SUCCESS;
 
     GlobusDsiRestEnter();
@@ -179,7 +180,7 @@ out:
 
     return result;
 }
-/* globus_l_s3_send_pending_buffers() */
+/* globus_l_dsi_rest_send_pending() */
 
 /**
  * @brief GridFTP write complete callback

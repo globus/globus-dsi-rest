@@ -32,6 +32,7 @@ TESTS_ENVIRONMENT = \
     GRIDMAP="$(GRIDMAP)" ;
 
 TEST_EXTENSIONS = .pl
+LOG_COMPILER = $(LIBTOOL) --mode=execute $(VALGRIND)
 PL_LOG_COMPILER = $(abs_srcdir)/test-wrapper
 
 libglobus_gridftp_server_dsi_rest_la_SOURCES = test-dsi.c

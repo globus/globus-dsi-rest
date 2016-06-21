@@ -58,6 +58,7 @@ globus_dsi_rest_request(
     if (callbacks->data_write_callback == globus_dsi_rest_write_block)
     {
         request->write_block_callback_arg =
+        request->write_block_callback_arg_orig =
                 *(globus_dsi_rest_write_block_arg_t *)
                 callbacks->data_write_callback_arg;
         request->callbacks.data_write_callback_arg =
@@ -74,7 +75,9 @@ globus_dsi_rest_request(
             result = GlobusDsiRestErrorMemory();
             goto json_encode_fail;
         }
-        request->write_block_callback_arg = (globus_dsi_rest_write_block_arg_t)
+        request->write_block_callback_arg =
+        request->write_block_callback_arg_orig =
+        (globus_dsi_rest_write_block_arg_t)
         {
             .block_data = jstring,
             .block_len = strlen(jstring)
@@ -93,7 +96,9 @@ globus_dsi_rest_request(
         {
             goto form_encode_fail;
         }
-        request->write_block_callback_arg = (globus_dsi_rest_write_block_arg_t)
+        request->write_block_callback_arg =
+        request->write_block_callback_arg_orig =
+        (globus_dsi_rest_write_block_arg_t)
         {
             .block_data = form_data,
             .block_len = strlen(form_data)
@@ -104,7 +109,9 @@ globus_dsi_rest_request(
     else if (callbacks->data_write_callback == globus_dsi_rest_write_gridftp_op)
     {
         globus_off_t                    start_byte = 0, byte_count = 0;
+        int                             rc = 0;
 
+        /* Is this ok to do here or should it be the DSI's reponsibility? */
         globus_gridftp_server_get_write_range(
                 callbacks->data_write_callback_arg,
                 &start_byte,
@@ -117,8 +124,18 @@ globus_dsi_rest_request(
             .offset = start_byte,
             .total = byte_count
         };
-        globus_mutex_init(&request->gridftp_op_arg.mutex, NULL);
-        globus_cond_init(&request->gridftp_op_arg.cond, NULL);
+        rc = globus_mutex_init(&request->gridftp_op_arg.mutex, NULL);
+        if (rc != GLOBUS_SUCCESS)
+        {
+            result = GlobusDsiRestErrorThreadFail(rc);
+            goto write_mutex_init_fail;
+        }
+        rc = globus_cond_init(&request->gridftp_op_arg.cond, NULL);
+        if (rc != GLOBUS_SUCCESS)
+        {
+            result = GlobusDsiRestErrorThreadFail(rc);
+            goto write_cond_init_fail;
+        }
 
         request->callbacks.data_write_callback_arg = &request->gridftp_op_arg;
     }
@@ -131,6 +148,7 @@ globus_dsi_rest_request(
     else if (callbacks->data_read_callback == globus_dsi_rest_read_gridftp_op)
     {
         globus_off_t                    start_byte = 0, byte_count = 0;
+        int                             rc = 0;
 
         globus_gridftp_server_get_read_range(
                 callbacks->data_read_callback_arg,
@@ -144,8 +162,19 @@ globus_dsi_rest_request(
             .offset = start_byte,
             .total = byte_count
         };
-        globus_mutex_init(&request->gridftp_op_arg.mutex, NULL);
-        globus_cond_init(&request->gridftp_op_arg.cond, NULL);
+        rc = globus_mutex_init(&request->gridftp_op_arg.mutex, NULL);
+        if (rc != GLOBUS_SUCCESS)
+        {
+            result = GlobusDsiRestErrorThreadFail(rc);
+            goto read_mutex_init_fail;
+        }
+
+        rc = globus_cond_init(&request->gridftp_op_arg.cond, NULL);
+        if (rc != GLOBUS_SUCCESS)
+        {
+            result = GlobusDsiRestErrorThreadFail(rc);
+            goto read_cond_init_fail;
+        }
 
         request->callbacks.data_read_callback_arg = &request->gridftp_op_arg;
     }
@@ -240,18 +269,21 @@ skip_chunked_header:
 
     result = globus_i_dsi_rest_perform(request);
 
-    if (callbacks->complete_callback == NULL)
+    if (result != GLOBUS_SUCCESS || callbacks->complete_callback == NULL)
     {
-        free(request);
-    }
-
-request_malloc_fail:
-form_encode_fail:
-json_encode_fail:
 invalid_method:
 invalid_headers:
 invalid_uri:
 no_handle:
+read_cond_init_fail:
+write_cond_init_fail:
+read_mutex_init_fail:
+write_mutex_init_fail:
+form_encode_fail:
+json_encode_fail:
+        globus_i_dsi_rest_request_cleanup(request);
+    }
+request_malloc_fail:
 bad_params:
     GlobusDsiRestExitResult(result);
     return result;

@@ -41,6 +41,7 @@ libglobus_dsi_rest_la_SOURCES = \
 	read_gridftp_op.c \
 	read_json.c \
 	request.c \
+	request_cleanup.c \
 	response.c \
 	set_request.c \
 	uri_add_query.c \

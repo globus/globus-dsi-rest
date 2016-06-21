@@ -46,6 +46,11 @@ struct test_case                        tests[] =
         .uri_pattern = "/fail",
         .fail = true,
     },
+    {
+        .method = "HEAD",
+        .uri_pattern = "/ENDSERVER",
+        .fail = false,
+    },
 };
 
 static
@@ -142,7 +147,6 @@ void *server_thread(void *arg)
 
             if (result != GLOBUS_SUCCESS)
             {
-                globus_xio_close(xio_handle, NULL);
                 goto end_this_socket;
             }
             if (strcmp(uri, "/ENDSERVER") == 0)
@@ -177,14 +181,11 @@ void *server_thread(void *arg)
             {
                 globus_xio_data_descriptor_destroy(descriptor);
             }
-            //if (result != GLOBUS_SUCCESS)
-            {
-                globus_xio_close(xio_handle, NULL);
-                xio_handle = NULL;
-                continue;
-            }
+            globus_xio_close(xio_handle, NULL);
+            xio_handle = NULL;
         }
     }
+    globus_xio_server_close(xio_server);
     return 0;
 }
 
@@ -297,7 +298,9 @@ int main()
             rc++;
         }
     }
-
+    free(contact_string);
+    globus_module_deactivate(GLOBUS_DSI_REST_MODULE);
+    globus_module_deactivate(GLOBUS_XIO_MODULE);
     curl_global_cleanup();
     return rc;
 }
