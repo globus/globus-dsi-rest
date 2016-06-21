@@ -38,18 +38,14 @@ globus_i_dsi_rest_header(
 
     GlobusDsiRestEnter();
 
-    if (request->callbacks.response_callback == NULL)
-    {
-        /* Don't bother parsing if client doesn't care */
-        goto done;
-    }
-
     if (request->response_code == 0 && request->response_reason[0] == 0)
     {
         /* Actually the status line, not a header */
         char bufferstring[total + 1];
         memcpy(bufferstring, buffer, total);
         bufferstring[total] = 0;
+
+        GlobusDsiRestInfo("%s", buffer);
 
         int scans = sscanf(bufferstring, "HTTP/%*s %d %64s",
                 &request->response_code,
@@ -59,6 +55,16 @@ globus_i_dsi_rest_header(
         {
             result = GlobusDsiRestErrorParse(bufferstring);
         }
+        goto done;
+    }
+    else
+    {
+        GlobusDsiRestDebug("%.*s", (int) (size*nitems), buffer); 
+    }
+
+    if (request->callbacks.response_callback == NULL)
+    {
+        /* Don't bother parsing if client doesn't care */
         goto done;
     }
 
@@ -120,11 +126,30 @@ globus_i_dsi_rest_header(
 
     if (memcmp(buffer, "\r\n", 2) == 0)
     {
-        result = request->callbacks.response_callback(
-            request->callbacks.response_callback_arg,
-            request->response_code,
-            request->response_reason,
-            &request->response_headers);
+        if (request->response_code == 100)
+        {
+            /* If we get a 100 Continue response, we'll need to reinitialize
+             * the headers and response code for the real response
+             */
+            request->response_code = 0;
+            request->response_reason[0] = 0;
+            for (size_t i = 0; i < request->response_headers.count; i++)
+            {
+                free((char *) request->response_headers.key_value[i].key);
+                free((char *) request->response_headers.key_value[i].value);
+            }
+            free(request->response_headers.key_value);
+            request->response_headers.key_value = NULL;
+            request->response_headers.count = 0;
+        }
+        else
+        {
+            result = request->callbacks.response_callback(
+                request->callbacks.response_callback_arg,
+                request->response_code,
+                request->response_reason,
+                &request->response_headers);
+        }
     }
 
 done:
