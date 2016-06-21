@@ -45,7 +45,7 @@ globus_i_dsi_rest_read_data(
     }
     else
     {
-        processed = 0;
+        result = GlobusDsiRestErrorUnexpectedData(buffer, (int)size*nitems);
     }
 
     if (request->result == GLOBUS_SUCCESS)
