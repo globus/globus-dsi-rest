@@ -48,15 +48,16 @@ globus_l_dsi_rest_response(
             globus_dsi_rest_key_value_t*response_header;
             response_header = &response_headers->key_value[j];
 
-            if (strcasecmp(desired->key, response_header[j].key) == 0)
+            if (strcasecmp(desired->key, response_header->key) == 0)
             {
-                desired->value = strdup(response_header[j].value);
+                desired->value = strdup(response_header->value);
                 if (desired->value == NULL)
                 {
                     result = GlobusDsiRestErrorMemory();
 
                     goto strdup_fail;
                 }
+                break;
             }
         }
     }
