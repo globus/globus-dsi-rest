@@ -1,9 +1,10 @@
-globus-dsi-rest (0.2-1+gt6.@distro@) @distro@; urgency=low
+globus-dsi-rest (0.4-1+gt6.@distro@) @distro@; urgency=low
 
   * Add more build dependencies
-  *  Add GLOBUS_HOSTNAME=localhost to test environment
+  * Add GLOBUS_HOSTNAME=localhost to test environment
+  * Fix non-const initializer
 
- -- Globus Toolkit <support@globus.org>  Tue, 21 Jun 2016 13:08:43 -0400
+ -- Globus Toolkit <support@globus.org>  Tue, 21 Jun 2016 13:23:17 -0400
 
 globus-dsi-rest (0.0-1+gt6.@distro@) @distro@; urgency=low
 

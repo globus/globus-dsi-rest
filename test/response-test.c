@@ -30,82 +30,9 @@ struct test_case
     char                               *location;
     globus_dsi_rest_key_array_t         desired_headers;
 };
+struct test_case                       *global_tests;
+size_t                                  global_tests_count;
 
-
-struct test_case                        tests[] =
-{
-    {
-        .method = "HEAD",
-        .uri_pattern = "/response-test/200-requested-but-no-location",
-        .response_code = 200,
-        .desired_headers = (globus_dsi_rest_key_array_t)
-        {
-            .count = 1,
-            .key_value = (globus_dsi_rest_key_value_t[])
-            {
-                { .key = "location" },
-            },
-        },
-    },
-    {
-        .method = "HEAD",
-        .uri_pattern = "/response-test/201-requested-location",
-        .response_code = 201,
-        .location = "/201-location",
-        .desired_headers = (globus_dsi_rest_key_array_t)
-        {
-            .count = 1,
-            .key_value = (globus_dsi_rest_key_value_t[])
-            {
-                { .key = "location" },
-            },
-        },
-    },
-    {
-        .method = "HEAD",
-        .uri_pattern = "/response-test/202-requested-location-other-no-location",
-        .response_code = 202,
-        .desired_headers = (globus_dsi_rest_key_array_t)
-        {
-            .count = 2,
-            .key_value = (globus_dsi_rest_key_value_t[])
-            {
-                { .key = "location" },
-                { .key = "x-globus-not-present" },
-            },
-        },
-    },
-    {
-        .method = "HEAD",
-        .uri_pattern = "/response-test/203-requested-location-other",
-        .response_code = 203,
-        .location = "/203-location",
-        .desired_headers = (globus_dsi_rest_key_array_t)
-        {
-            .count = 2,
-            .key_value = (globus_dsi_rest_key_value_t[])
-            {
-                { .key = "location" },
-                { .key = "x-globus-not-present" },
-            },
-        },
-    },
-    {
-        .method = "HEAD",
-        .uri_pattern = "/response-test/204-requested-other-location",
-        .response_code = 204,
-        .location = "/204-location",
-        .desired_headers = (globus_dsi_rest_key_array_t)
-        {
-            .count = 2,
-            .key_value = (globus_dsi_rest_key_value_t[])
-            {
-                { .key = "x-globus-not-present" },
-                { .key = "location" },
-            },
-        },
-    },
-};
 
 globus_xio_driver_t                     http_driver;
 
@@ -170,13 +97,13 @@ void *server_thread(void *arg)
                 globus_xio_close(xio_handle, NULL);
                 goto end_this_socket;
             }
-            for (size_t i = 0; i < sizeof(tests)/sizeof(tests[0]); i++)
+            for (size_t i = 0; i < global_tests_count; i++)
             {
 
-                if (strcmp(method, tests[i].method) == 0
-                    && strcmp(tests[i].uri_pattern, uri) == 0)
+                if (strcmp(method, global_tests[i].method) == 0
+                    && strcmp(global_tests[i].uri_pattern, uri) == 0)
                 {
-                    test = &tests[i];
+                    test = &global_tests[i];
                     break;
                 }
             }
@@ -226,6 +153,82 @@ int main()
     globus_xio_stack_t                  xio_stack;
     char                               *contact_string;
     int                                 rc = 0;
+    struct test_case                    tests[] =
+    {
+        {
+            .method = "HEAD",
+            .uri_pattern = "/response-test/200-requested-but-no-location",
+            .response_code = 200,
+            .desired_headers = (globus_dsi_rest_key_array_t)
+            {
+                .count = 1,
+                .key_value = (globus_dsi_rest_key_value_t[])
+                {
+                    { .key = "location" },
+                },
+            },
+        },
+        {
+            .method = "HEAD",
+            .uri_pattern = "/response-test/201-requested-location",
+            .response_code = 201,
+            .location = "/201-location",
+            .desired_headers = (globus_dsi_rest_key_array_t)
+            {
+                .count = 1,
+                .key_value = (globus_dsi_rest_key_value_t[])
+                {
+                    { .key = "location" },
+                },
+            },
+        },
+        {
+            .method = "HEAD",
+            .uri_pattern = "/response-test/202-requested-location-other-no-location",
+            .response_code = 202,
+            .desired_headers = (globus_dsi_rest_key_array_t)
+            {
+                .count = 2,
+                .key_value = (globus_dsi_rest_key_value_t[])
+                {
+                    { .key = "location" },
+                    { .key = "x-globus-not-present" },
+                },
+            },
+        },
+        {
+            .method = "HEAD",
+            .uri_pattern = "/response-test/203-requested-location-other",
+            .response_code = 203,
+            .location = "/203-location",
+            .desired_headers = (globus_dsi_rest_key_array_t)
+            {
+                .count = 2,
+                .key_value = (globus_dsi_rest_key_value_t[])
+                {
+                    { .key = "location" },
+                    { .key = "x-globus-not-present" },
+                },
+            },
+        },
+        {
+            .method = "HEAD",
+            .uri_pattern = "/response-test/204-requested-other-location",
+            .response_code = 204,
+            .location = "/204-location",
+            .desired_headers = (globus_dsi_rest_key_array_t)
+            {
+                .count = 2,
+                .key_value = (globus_dsi_rest_key_value_t[])
+                {
+                    { .key = "x-globus-not-present" },
+                    { .key = "location" },
+                },
+            },
+        },
+    };
+    global_tests = tests;
+    global_tests_count = sizeof(tests)/sizeof(tests[0]);
 
     globus_thread_set_model("pthread");
 
