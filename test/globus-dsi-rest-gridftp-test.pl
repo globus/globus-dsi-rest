@@ -1,7 +1,6 @@
 #! /usr/bin/perl
 
 use strict;
-use URI::Escape;
 use Test::More;
 use File::Temp qw(tempfile);
 

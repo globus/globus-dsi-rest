@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.0
+Version:	0.1
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -17,6 +17,9 @@ BuildRequires:  globus-common-devel
 BuildRequires:  curl-devel
 BuildRequires:  doxygen
 BuildRequires:  jansson-devel
+%if %{?fedora}%{!?fedora:0} >= 18 || %{?rhel}%{!?rhel:0} >= 6
+BuildRequires:  perl-Test-Simple
+%endif
 
 %if %{?fedora}%{!?fedora:0} >= 19 || %{?rhel}%{!?rhel:0} >= 7
 Requires:       openssl
@@ -123,5 +126,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Tue Jun 21 2016 Globus Toolkit <support@globus.org> - 0.1-1
+- Remove URI::Escape from perl test
+- Add dependency on perl-Test-Simple
+
 * Wed Jun  8 2016 Globus Toolkit <support@globus.org> - 0.0-1
 - Initial package
