@@ -42,8 +42,6 @@ globus_dsi_rest_request(
         goto bad_params;
     }
 
-    GlobusDsiRestInfo("%s %s\n", method, uri);
-
     request = malloc(sizeof(globus_i_dsi_rest_request_t));
     if (request == NULL)
     {
@@ -60,8 +58,10 @@ globus_dsi_rest_request(
     if (callbacks->data_write_callback == globus_dsi_rest_write_block)
     {
         request->write_block_callback_arg =
-                *(globus_dsi_rest_write_block_arg_t *) callbacks->data_write_callback_arg;
-        request->callbacks.data_write_callback_arg = &request->write_block_callback_arg;
+                *(globus_dsi_rest_write_block_arg_t *)
+                callbacks->data_write_callback_arg;
+        request->callbacks.data_write_callback_arg =
+                &request->write_block_callback_arg;
     }
     else if (callbacks->data_write_callback == globus_dsi_rest_write_json)
     {
@@ -79,7 +79,8 @@ globus_dsi_rest_request(
             .block_data = jstring,
             .block_len = strlen(jstring)
         };
-        request->callbacks.data_write_callback_arg = &request->write_block_callback_arg;
+        request->callbacks.data_write_callback_arg =
+                &request->write_block_callback_arg;
     }
     else if (callbacks->data_write_callback == globus_dsi_rest_write_form)
     {
@@ -97,7 +98,8 @@ globus_dsi_rest_request(
             .block_data = form_data,
             .block_len = strlen(form_data)
         };
-        request->callbacks.data_write_callback_arg = &request->write_block_callback_arg;
+        request->callbacks.data_write_callback_arg =
+                &request->write_block_callback_arg;
     }
     else if (callbacks->data_write_callback == globus_dsi_rest_write_gridftp_op)
     {
@@ -183,7 +185,7 @@ globus_dsi_rest_request(
         result = globus_i_dsi_rest_add_header(
                 &request->request_headers,
                 "Content-Type",
-                "application/json; charset=UTF=8");
+                "application/json; charset=UTF-8");
         if (result != GLOBUS_SUCCESS)
         {
             goto invalid_headers;
@@ -208,50 +210,16 @@ globus_dsi_rest_request(
     {
         for (size_t i = 0; i < (headers != NULL) ? headers->count : 0; i++)
         {
-            if (strcasecmp(headers->key_value[i].key, "Content-Length") == 0)
-            {
-                if (sscanf(headers->key_value[i].value,
-                            "%"SCNu64,
-                            &request->request_content_length) != 1)
-                {
-                    goto invalid_headers;
-                }
-                request->request_content_length_set = true;
-                goto skip_chunked_header;
-            }
-            else if(strcasecmp(headers->key_value[i].key, "Transfer-Encoding") == 0)
+            if (strcasecmp(headers->key_value[i].key, "Transfer-Encoding") == 0
+                || strcasecmp(headers->key_value[i].key, "Content-Length") == 0)
             {
                 goto skip_chunked_header;
             }
         }
-        if (callbacks->data_write_callback == globus_dsi_rest_write_json ||
-            callbacks->data_write_callback == globus_dsi_rest_write_block)
-        {
-            request->request_content_length =
-                    request->write_block_callback_arg.block_len;
-            request->request_content_length_set = true;
-
-            size_t                      slen = snprintf(
-                                                NULL,
-                                                0,
-                                                "%"PRIu64,
-                                                request->request_content_length);
-            char                        h[slen+1];
-
-            snprintf(h,
-                    sizeof(h),
-                    "%"PRIu64,
-                    request->request_content_length);
-
-            result = globus_i_dsi_rest_add_header(
-                    &request->request_headers,
-                    "Content-Length",
-                    h);
-        }
-            result = globus_i_dsi_rest_add_header(
-                    &request->request_headers,
-                    "Transfer-Encoding",
-                    "chunked");
+        result = globus_i_dsi_rest_add_header(
+                &request->request_headers,
+                "Transfer-Encoding",
+                "chunked");
         if (result != GLOBUS_SUCCESS)
         {
             goto invalid_headers;

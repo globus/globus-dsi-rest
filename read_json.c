@@ -45,9 +45,9 @@ globus_l_dsi_rest_read_json(
 
         available = jdata->buffer_len - jdata->buffer_used;
 
-        if (available < buffer_length)
+        if (available < buffer_length+1)
         {
-            increase = (((buffer_length - available) / JSON_BLOCK_SIZE) + 1) * JSON_BLOCK_SIZE;
+            increase = (((buffer_length+1 - available) / JSON_BLOCK_SIZE) + 1) * JSON_BLOCK_SIZE;
 
             resized = realloc(jdata->buffer, increase + jdata->buffer_len);
 
@@ -64,10 +64,12 @@ globus_l_dsi_rest_read_json(
                 buffer_length);
 
         jdata->buffer_used += buffer_length;
+        jdata->buffer[jdata->buffer_used] = 0;
     }
     else
     {
         /* Final read, parse json */
+        GlobusDsiRestDebug(jdata->buffer);
         *jdata->json_out = json_loadb(jdata->buffer, jdata->buffer_used, 0, &error);
         if (*jdata->json_out == NULL)
         {

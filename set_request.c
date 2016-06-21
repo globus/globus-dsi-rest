@@ -35,6 +35,15 @@ globus_i_dsi_rest_set_request(
 
     GlobusDsiRestEnter();
 
+    GlobusDsiRestInfo("%s %s\n", method, uri);
+    if (GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_DEBUG))
+    {
+        for (struct curl_slist *s = headers; s != NULL; s = s->next)
+        {
+            GlobusDsiRestDebug("%s\n", s->data);
+        }
+    }
+
     rc = curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, NULL);
     if (strcmp(method, "HEAD") == 0)
     {

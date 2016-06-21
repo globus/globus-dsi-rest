@@ -247,15 +247,15 @@ void
  * @param[in] progress_callback_arg
  *     DSI-specific data passed to the request operation.
  * @param[in] total_read
- *     Total amount of data read during processing this request.
+ *     Total amount of data expected to be read during processing this request
+ *     if known, otherwise 0.
  * @param[in] amt_read
- *     Amount of data read during processing this request since this function
- *     was last called.
+ *     Amount of data read so far processing this request.
  * @param[in] total_written
- *     Total amount of data written during processing this request.
+ *     Total amount of data expected to be writte during processing this
+ *     request if known, otherwise 0.
  * @param[in] amt_written
- *     Amount of data written during processing this request since this
- *     function was last called.
+ *     Amount of data written so far processing this request.
  *
  * @return
  *     The DSI should return GLOBUS_SUCCESS to allow processing to continue.

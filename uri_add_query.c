@@ -105,6 +105,8 @@ globus_dsi_rest_uri_add_query(
         }
     }
 
+    GlobusDsiRestTrace("complete_uri=%s\n", complete_uri);
+
 memory_fail:
     *complete_urip = complete_uri;
 

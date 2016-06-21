@@ -61,6 +61,8 @@ globus_i_dsi_rest_idle_arg_s
 {
     globus_abstime_t                    last_activity;
     uintptr_t                           idle_timeout;
+    uint64_t                            last_amt_read;
+    uint64_t                            last_amt_written;
 }
 globus_i_dsi_rest_idle_arg_t;
 
@@ -232,7 +234,8 @@ enum
     GLOBUS_DSI_REST_ERROR_CURL,
     GLOBUS_DSI_REST_ERROR_JSON,
     GLOBUS_DSI_REST_ERROR_TIME_OUT,
-    GLOBUS_DSI_REST_ERROR_THREAD_FAIL
+    GLOBUS_DSI_REST_ERROR_THREAD_FAIL,
+    GLOBUS_DSI_REST_ERROR_UNEXPECTED_DATA,
 };
 
 #define GlobusDsiRestErrorParameter() \
@@ -249,6 +252,8 @@ enum
     globus_error_put(GlobusDsiRestErrorTimeOutObject())
 #define GlobusDsiRestErrorThreadFail(rc) \
     globus_error_put(GlobusDsiRestErrorThreadFailObject(rc))
+#define GlobusDsiRestErrorUnexpectedData(s, len) \
+    globus_error_put(GlobusDsiRestErrorUnexpectedDataObject(s, len))
 
 #define GlobusDsiRestErrorParameterObject() \
     globus_error_construct_error( \
@@ -315,6 +320,15 @@ enum
         __func__, \
         __LINE__, \
         "Thread create failed: %d", rc)
+#define GlobusDsiRestErrorUnexpectedDataObject(s,len) \
+    globus_error_construct_error( \
+        GLOBUS_DSI_REST_MODULE, \
+        NULL, \
+        GLOBUS_DSI_REST_ERROR_UNEXPECTED_DATA, \
+        __FILE__, \
+        __func__, \
+        __LINE__, \
+        "Unexpected data failed: %.*s", (int)len, s)
 
 /* Logging */
 GlobusDebugDeclare(GLOBUS_DSI_REST);
