@@ -38,7 +38,17 @@ globus_i_dsi_rest_write_data(
     GlobusDsiRestTrace("buffer=%p buffer_size=%d\n",
             (void *) ptr,
             size*nmemb);
-    
+
+    if (GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE))
+    {
+        char                           *p = ptr;
+        for (size_t i = 0; i < data_processed; i++)
+        {
+            GlobusDebugPrintf(
+                GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE,
+                ("%c", isprint(p[i]) ? p[i] : '.'));
+        }
+    }
 
     if (request->callbacks.data_read_callback != NULL)
     {
