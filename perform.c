@@ -91,7 +91,7 @@ globus_l_dsi_rest_perform(
     {
         result = GlobusDsiRestErrorCurl(rc);
 
-        goto setopt_fail;
+        goto perform_fail;
     }
     if (request->callbacks.data_read_callback != NULL)
     {
@@ -99,17 +99,17 @@ globus_l_dsi_rest_perform(
                 request->callbacks.data_read_callback_arg,
                 "",
                 0);
-        if (request->result == GLOBUS_SUCCESS)
-        {
-            request->result = result;
-        }
     }
     /*
      * TODO: If using the gridftp_op functions, wait for blocks to return from
      * GridFTP server
      */
 
-setopt_fail:
+perform_fail:
+    if (request->result == GLOBUS_SUCCESS)
+    {
+        request->result = result;
+    }
     GlobusDsiRestExitResult(result);
     return result;
 }
