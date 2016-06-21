@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.1
+Version:	0.2
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,8 +127,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
-* Tue Jun 21 2016 Globus Toolkit <support@globus.org> - 0.1-1
-- Remove URI::Escape from perl test
+* Tue Jun 21 2016 Globus Toolkit <support@globus.org> - 0.2-1
 - Add dependency on perl-Test-Simple
 
 * Wed Jun  8 2016 Globus Toolkit <support@globus.org> - 0.0-1
