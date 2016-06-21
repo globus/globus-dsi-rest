@@ -1,7 +1,7 @@
 Source: globus-dsi-rest
 Priority: optional
 Maintainer: Globus Toolkit <support@globus.org>
-Build-Depends: debhelper (>= 9), autotools-dev, libglobus-gridftp-server-dev, libglobus-common-dev, libglobus-xio-dev, libjansson-dev, libcurl4-openssl-dev, doxygen, graphviz, dh-exec, openssl, globus-gass-copy-progs, globus-gridftp-server-progs
+Build-Depends: debhelper (>= 9), autotools-dev, libglobus-gridftp-server-dev, libglobus-common-dev, libglobus-xio-dev, libjansson-dev, libcurl4-openssl-dev, doxygen, graphviz, dh-exec, openssl, globus-gass-copy-progs, globus-gridftp-server-progs, liburi-perl
 Standards-Version: 3.9.6
 Section: libs
 #Vcs-Git: git://anonscm.debian.org/collab-maint/globus-gridftp-server-s3.git

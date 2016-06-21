@@ -1,6 +1,5 @@
 globus-dsi-rest (0.1-1+gt6.@distro@) @distro@; urgency=low
 
-  * Remove URI::Escape from perl test
   * Add more build dependencies
 
  -- Globus Toolkit <support@globus.org>  Tue, 21 Jun 2016 12:03:36 -0400

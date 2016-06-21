@@ -43,8 +43,13 @@ $subject =~ s/^subject= *//;
 
 print STDERR "#Subject is $subject\n";
 print STDERR "#PATH is $ENV{PATH}\n";
-print STDERR "#executing $server_prog $server_args\n";
-$server_pid = open(SERVER, "$server_prog $server_args |");
+my $libtool_execute="";
+if (exists $ENV{LIBTOOL})
+{
+    $libtool_execute = "$ENV{LIBTOOL} --mode=execute -dlopen libglobus_gridftp_server_dsi_rest.la"
+}
+print STDERR "#executing $libtool_execute $server_prog $server_args\n";
+$server_pid = open(SERVER, "$libtool_execute $server_prog $server_args |");
  
 if($server_pid == -1)
 {

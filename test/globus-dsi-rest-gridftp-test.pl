@@ -2,6 +2,7 @@
 
 use strict;
 use Test::More;
+use URI::Escape;
 use File::Temp qw(tempfile);
 
 my $subject = $ENV{GLOBUS_FTP_CLIENT_TEST_SUBJECT};

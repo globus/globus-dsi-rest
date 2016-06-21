@@ -27,10 +27,11 @@ TESTS_ENVIRONMENT = \
     X509_USER_KEY=$$PWD/testcred.key \
     X509_USER_PROXY=/dev/null \
     X509_CERT_DIR="$(X509_CERT_DIR)" \
+    LIBTOOL="$(LIBTOOL)" \
     GRIDMAP="$(GRIDMAP)" ;
 
 TEST_EXTENSIONS = .pl
-PL_LOG_COMPILER = $(LIBTOOL) --mode=execute -dlopen libglobus_gridftp_server_dsi_rest.la $(abs_srcdir)/test-wrapper
+PL_LOG_COMPILER = $(abs_srcdir)/test-wrapper
 
 libglobus_gridftp_server_dsi_rest_la_SOURCES = test-dsi.c
 libglobus_gridftp_server_dsi_rest_la_LDFLAGS = $(AM_LDFLAGS) -rpath $(libdir) -module
