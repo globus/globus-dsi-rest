@@ -40,11 +40,17 @@ globus_i_dsi_rest_write_data(
             size*nmemb);
     
 
-    result = request->callbacks.data_read_callback(
-            request->callbacks.data_read_callback_arg,
-            ptr,
-            data_processed);
-
+    if (request->callbacks.data_read_callback != NULL)
+    {
+        result = request->callbacks.data_read_callback(
+                request->callbacks.data_read_callback_arg,
+                ptr,
+                data_processed);
+    }
+    else
+    {
+        result = GlobusDsiRestErrorUnexpectedData(ptr, (int)size*nmemb);
+    }
     if (request->result == GLOBUS_SUCCESS)
     {
         request->result = result;
