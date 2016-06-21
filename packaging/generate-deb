@@ -1,0 +1,23 @@
+#! /bin/sh
+
+pkgdir=${0%/*}
+topdir=${pkgdir%/*}
+
+make dist
+pkg_version=$(${topdir}/configure --version | awk "{print \$1 \"-\" \$3; exit}" )
+name=${pkg_version%%-*}
+version=${pkg_version##*-}
+debname=$(echo ${name} | tr _ -)
+
+# Create debianized source
+tar zxf ${pkg_version}.tar.gz
+cp -a $pkgdir/debian/${debname}/debian ${pkg_version}/debian
+sed -e "s/@distro@/$(lsb_release -cs)/g" \
+    < ${pkg_version}/debian/changelog.in \
+    > ${pkg_version}/debian/changelog
+
+rm ${pkg_version}/debian/changelog.in
+mv ${pkg_version}.tar.gz ${debname}_${version}.orig.tar.gz
+
+cd ${pkg_version}
+dpkg-buildpackage -uc -us
