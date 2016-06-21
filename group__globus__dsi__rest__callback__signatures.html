@@ -144,10 +144,10 @@ Typedefs</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">progress_callback_arg</td><td>DSI-specific data passed to the request operation. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">total_read</td><td>Total amount of data read during processing this request. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">amt_read</td><td>Amount of data read during processing this request since this function was last called. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">total_written</td><td>Total amount of data written during processing this request. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">amt_written</td><td>Amount of data written during processing this request since this function was last called.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">total_read</td><td>Total amount of data expected to be read during processing this request if known, otherwise 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">amt_read</td><td>Amount of data read so far processing this request. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">total_written</td><td>Total amount of data expected to be writte during processing this request if known, otherwise 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">amt_written</td><td>Amount of data written so far processing this request.</td></tr>
   </table>
   </dd>
 </dl>
