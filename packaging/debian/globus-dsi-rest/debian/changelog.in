@@ -1,9 +1,10 @@
-globus-dsi-rest (0.6-1+gt6.@distro@) @distro@; urgency=low
+globus-dsi-rest (0.6-2+gt6.@distro@) @distro@; urgency=low
 
   * Add valgrind hook to tests
   * Change argument to globus_dsi_rest_*_gridftp_op
   * Move GridFTP range handling to DSI's responsibility
   * Fix documentation of globus_dsi_rest_write_block_arg_t
+  * Rename packages
 
  -- Globus Toolkit <support@globus.org>  Wed, 22 Jun 2016 14:17:06 -0400
 
