@@ -14,7 +14,7 @@ Description: Globus DSI REST Helper API
 
 Package: libglobus-dsi-rest-dev
 Architecture: any
-Depends: globus-dsi-rest0 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: libglobus-dsi-rest0 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Globus DSI REST Helper API Development Files
 
 Package: globus-dsi-rest-doc
@@ -24,5 +24,5 @@ Description: Globus DSI REST Helper API Development Files
 
 Package: globus-dsi-rest-dbg
 Architecture: any
-Depends: globus-dsi-rest (= ${binary:Version}), ${misc:Depends}
+Depends: libglobus-dsi-rest0 (= ${binary:Version}), ${misc:Depends}
 Description: Globus DSI REST Helper API Debug Symbols
