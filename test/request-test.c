@@ -338,7 +338,6 @@ void *server_thread(void *arg)
                 }
             }
 
-
             globus_xio_handle_cntl(
                     xio_handle,
                     http_driver,
@@ -364,13 +363,17 @@ void *server_thread(void *arg)
                         strlen(download_body),
                         strlen(download_body),
                         &nbytes, NULL);
+                if (result != GLOBUS_SUCCESS)
+                {
+                    char *errstr = globus_error_print_friendly(globus_error_peek(result));
+                    fprintf(stderr, "WRITE ERROR: %s\n", errstr);
+                    free(errstr);
+                    goto end_this_socket;
+                }
             }
-            else
-            {
-                result = globus_xio_handle_cntl(xio_handle,
-                        http_driver,
-                        GLOBUS_XIO_HTTP_HANDLE_SET_END_OF_ENTITY);
-            }
+            result = globus_xio_handle_cntl(xio_handle,
+                    http_driver,
+                    GLOBUS_XIO_HTTP_HANDLE_SET_END_OF_ENTITY);
 
         end_this_socket:
             if (descriptor != NULL)
