@@ -42,12 +42,16 @@ globus_i_dsi_rest_write_data(
     if (GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE))
     {
         char                           *p = ptr;
+        char                           *q = malloc(data_processed+1);
+
+        q[data_processed] = '\0';
+
         for (size_t i = 0; i < data_processed; i++)
         {
-            GlobusDebugPrintf(
-                GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE,
-                ("%c", isprint(p[i]) ? p[i] : '.'));
+            q[i] = isprint(p[i]) ? p[i] : '.';
         }
+        GlobusDebugPrintf(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE, ("%s\n", q));
+        free(q);
     }
 
     if (request->callbacks.data_read_callback != NULL)

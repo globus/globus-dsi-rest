@@ -306,7 +306,7 @@ globus_l_dsi_rest_thread(
                         dsi_rest_handle->xio_handle,
                         dsi_rest_handle->http_driver,
                         GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
-                        201);
+                        204);
                 globus_xio_handle_cntl(
                         dsi_rest_handle->xio_handle,
                         dsi_rest_handle->http_driver,
@@ -539,6 +539,7 @@ globus_l_dsi_rest_recv(
     globus_gfs_transfer_info_t *        transfer_info,
     void *                              user_arg)
 {
+    globus_dsi_rest_gridftp_op_arg_t    gridftp_op_arg = {.op=op};
     globus_l_dsi_rest_handle_t         *dsi_rest_handle = user_arg;
     char                               *uri;
     globus_result_t                     result;
@@ -555,16 +556,28 @@ globus_l_dsi_rest_recv(
     }
 
     globus_gridftp_server_begin_transfer(op, 0, NULL);
-    result = globus_dsi_rest_request(
-            "PUT",
-            uri,
-            NULL,
-            NULL,
-            &(globus_dsi_rest_callbacks_t)
-            {
-                .data_write_callback = globus_dsi_rest_write_gridftp_op,
-                .data_write_callback_arg = op
-            });
+    do
+    {
+        globus_gridftp_server_get_write_range(
+                gridftp_op_arg.op,
+                &gridftp_op_arg.offset,
+                &gridftp_op_arg.length);
+
+        if (gridftp_op_arg.length != 0)
+        {
+            result = globus_dsi_rest_request(
+                    "PUT",
+                    uri,
+                    NULL,
+                    NULL,
+                    &(globus_dsi_rest_callbacks_t)
+                    {
+                        .data_write_callback = globus_dsi_rest_write_gridftp_op,
+                        .data_write_callback_arg = &gridftp_op_arg,
+                    });
+        }
+    }
+    while (gridftp_op_arg.length != 0 && gridftp_op_arg.length != -1);
 
 create_uri_fail:
     globus_gridftp_server_finished_transfer(op, result);
@@ -593,6 +606,7 @@ globus_l_dsi_rest_send(
     globus_gfs_transfer_info_t *        transfer_info,
     void *                              user_arg)
 {
+    globus_dsi_rest_gridftp_op_arg_t    gridftp_op_arg = {.op=op };
     globus_l_dsi_rest_handle_t         *dsi_rest_handle = user_arg;
     char                               *uri;
     globus_result_t                     result;
@@ -609,16 +623,28 @@ globus_l_dsi_rest_send(
     }
 
     globus_gridftp_server_begin_transfer(op, 0, NULL);
-    result = globus_dsi_rest_request(
-            "GET",
-            uri,
-            NULL,
-            NULL,
-            &(globus_dsi_rest_callbacks_t)
-            {
-                .data_read_callback = globus_dsi_rest_read_gridftp_op,
-                .data_read_callback_arg = op
-            });
+
+    do
+    {
+        globus_gridftp_server_get_read_range(
+                gridftp_op_arg.op,
+                &gridftp_op_arg.offset,
+                &gridftp_op_arg.length);
+        if (gridftp_op_arg.length != 0)
+        {
+            result = globus_dsi_rest_request(
+                    "GET",
+                    uri,
+                    NULL,
+                    NULL,
+                    &(globus_dsi_rest_callbacks_t)
+                    {
+                        .data_read_callback = globus_dsi_rest_read_gridftp_op,
+                        .data_read_callback_arg = &gridftp_op_arg,
+                    });
+        }
+    }
+    while (gridftp_op_arg.length != 0);
 
 create_uri_fail:
     globus_gridftp_server_finished_transfer(op, result);

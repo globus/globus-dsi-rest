@@ -45,7 +45,6 @@ globus_l_dsi_rest_read_gridftp_op(
     size_t                              buffer_length)
 {
     globus_i_dsi_rest_gridftp_op_arg_t *gridftp_op_arg = read_callback_arg;
-    bool                                eof = (buffer_length == 0);
     globus_result_t                     result = GLOBUS_SUCCESS;
 
     GlobusDsiRestEnter();
@@ -148,6 +147,9 @@ globus_l_dsi_rest_send_pending(
 
         buffer = gridftp_op_arg->pending_buffers;
 
+            GlobusDsiRestTrace("Registering read op=%p rest_buffer=%p\n",
+                          gridftp_op_arg->op,
+                          (void *) buffer);
         result = globus_gridftp_server_register_write(
                 gridftp_op_arg->op,
                 buffer->buffer,

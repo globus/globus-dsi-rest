@@ -56,6 +56,7 @@ extern "C" {
 
 #include <stdlib.h>
 #include "globus_common.h"
+#include "globus_gridftp_server.h"
 
 /**
  * @defgroup globus_dsi_rest_data Data Types
@@ -416,7 +417,7 @@ globus_dsi_rest_uri_escape(
  * @details
  *     A pointer to a data structure of this type must be be used as the
  *     data_write_callback_arg parameter when using the
- *     globus_dsi_rest_write_one_block() function as the data_write_callback
+ *     globus_dsi_rest_write_block() function as the data_write_callback
  *     to globus_dsi_rest_request().
  */
 typedef
@@ -471,6 +472,32 @@ extern globus_dsi_rest_write_t const    globus_dsi_rest_write_json;
 extern globus_dsi_rest_write_t const    globus_dsi_rest_write_form;
 
 /**
+ * @brief GridFTP Operation write specialization data_write_callback_arg
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     A pointer to a data structure of this type must be be used as the
+ *     data_write_callback_arg parameter when using the
+ *     globus_dsi_rest_write_gridftp_op() function as the data_write_callback
+ *     to globus_dsi_rest_request().
+ */
+typedef
+struct globus_dsi_rest_gridftp_op_arg_s
+{
+    /** The GridFTP operation */
+    globus_gfs_operation_t              op;
+    /** The start offset of the data */
+    globus_off_t                        offset;
+    /**
+     * The amount of data to expect. May be -1 to indicate all data.
+     * Currently ignored
+     * TODO: Add support for reading only a part of a GridFTP data stream
+     * at a time.
+     */
+    globus_off_t                        length;
+}
+globus_dsi_rest_gridftp_op_arg_t;
+
+/**
  * @brief GridFTP operation write specialization of globus_dsi_rest_write_t
  * @ingroup globus_dsi_rest_callback_specializations
  * @details
@@ -482,7 +509,7 @@ extern globus_dsi_rest_write_t const    globus_dsi_rest_write_form;
  *     the REST server.
  *
  *     The write_callback_arg used with this function
- *     <b>MUST BE</b> a globus_gfs_operation_t.
+ *     <b>MUST BE</b> a pointer to a globus_dsi_rest_gridftp_op_arg_t.
  */
 extern globus_dsi_rest_write_t const    globus_dsi_rest_write_gridftp_op;
 
@@ -514,7 +541,7 @@ extern globus_dsi_rest_read_t const     globus_dsi_rest_read_json;
  *     the GridFTP data channel.
  *
  *     The read_callback_arg used with this function <b>MUST BE</b> a
- *     globus_gfs_operation_t.
+ *     pointer to a globus_dsi_rest_gridftp_op_arg_t.
  */
 extern globus_dsi_rest_read_t const     globus_dsi_rest_read_gridftp_op;
 

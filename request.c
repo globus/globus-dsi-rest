@@ -108,21 +108,25 @@ globus_dsi_rest_request(
     }
     else if (callbacks->data_write_callback == globus_dsi_rest_write_gridftp_op)
     {
-        globus_off_t                    start_byte = 0, byte_count = 0;
+        globus_dsi_rest_gridftp_op_arg_t
+                                       *gridftp_op_arg = callbacks->data_write_callback_arg;
         int                             rc = 0;
 
-        /* Is this ok to do here or should it be the DSI's reponsibility? */
-        globus_gridftp_server_get_write_range(
-                callbacks->data_write_callback_arg,
-                &start_byte,
-                &byte_count);
+        GlobusDsiRestDebug(
+                "data_write_callback=globus_dsi_rest_write_gridftp_op"
+                " gridftp_op=%p"
+                " offset=%"GLOBUS_OFF_T_FORMAT
+                " length=%"GLOBUS_OFF_T_FORMAT"\n",
+                (void *) gridftp_op_arg->op,
+                gridftp_op_arg->offset,
+                gridftp_op_arg->length);
 
         request->gridftp_op_arg = (globus_i_dsi_rest_gridftp_op_arg_t)
         {
-            .op = callbacks->data_write_callback_arg,
+            .op = gridftp_op_arg->op,
             .pending_buffers_last = &request->gridftp_op_arg.pending_buffers,
-            .offset = start_byte,
-            .total = byte_count
+            .offset = gridftp_op_arg->offset,
+            .total = gridftp_op_arg->length
         };
         rc = globus_mutex_init(&request->gridftp_op_arg.mutex, NULL);
         if (rc != GLOBUS_SUCCESS)
@@ -147,20 +151,25 @@ globus_dsi_rest_request(
     }
     else if (callbacks->data_read_callback == globus_dsi_rest_read_gridftp_op)
     {
-        globus_off_t                    start_byte = 0, byte_count = 0;
+        globus_dsi_rest_gridftp_op_arg_t
+                                       *gridftp_op_arg = callbacks->data_read_callback_arg;
         int                             rc = 0;
 
-        globus_gridftp_server_get_read_range(
-                callbacks->data_read_callback_arg,
-                &start_byte,
-                &byte_count);
+        GlobusDsiRestDebug(
+                "data_write_callback=globus_dsi_rest_write_gridftp_op"
+                " gridftp_op=%p"
+                " offset=%"GLOBUS_OFF_T_FORMAT
+                " length=%"GLOBUS_OFF_T_FORMAT"\n",
+                (void *) gridftp_op_arg->op,
+                gridftp_op_arg->offset,
+                gridftp_op_arg->length);
 
         request->gridftp_op_arg = (globus_i_dsi_rest_gridftp_op_arg_t)
         {
-            .op = callbacks->data_read_callback_arg,
+            .op = gridftp_op_arg->op,
             .pending_buffers_last = &request->gridftp_op_arg.pending_buffers,
-            .offset = start_byte,
-            .total = byte_count
+            .offset = gridftp_op_arg->offset,
+            .total = gridftp_op_arg->length,
         };
         rc = globus_mutex_init(&request->gridftp_op_arg.mutex, NULL);
         if (rc != GLOBUS_SUCCESS)

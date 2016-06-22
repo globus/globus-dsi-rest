@@ -286,6 +286,9 @@ globus_l_dsi_rest_write_register_reads(
             "Currently %d blocks registered\n",
             currently_registered);
 
+    /* TODO: check against total length of operation so that we can support
+     * partial or restarted transfers
+     */
     if (gridftp_op_arg->result == GLOBUS_SUCCESS && !gridftp_op_arg->eof)
     {
         /* Reads still might be useful */

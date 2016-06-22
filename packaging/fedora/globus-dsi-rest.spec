@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.5
+Version:	0.6
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,12 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Web Jun 22 2016 Globus Toolkit <support@globus.org> - 0.6-1
+- Add valgrind hook to tests
+- Change argument to globus_dsi_rest_*_gridftp_op
+- Move GridFTP range handling to DSI's responsibility
+- Fix documentation of globus_dsi_rest_write_block_arg_t
+
 * Tue Jun 21 2016 Globus Toolkit <support@globus.org> - 0.5-1
 - Add dependency on perl-Test-Simple
 - Add GLOBUS_HOSTNAME=localhost to test environment

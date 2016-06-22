@@ -44,11 +44,17 @@ $subject =~ s/^subject= *//;
 print STDERR "#Subject is $subject\n";
 print STDERR "#PATH is $ENV{PATH}\n";
 my $libtool_execute="";
+my $valgrind_execute="";
 if (exists $ENV{LIBTOOL})
 {
     $libtool_execute = "$ENV{LIBTOOL} --mode=execute -dlopen libglobus_gridftp_server_dsi_rest.la"
 }
-print STDERR "#executing $libtool_execute $server_prog $server_args\n";
+if (exists $ENV{VALGRIND})
+{
+    $valgrind_execute = $ENV{VALGRIND};
+}
+print STDERR "#executing $libtool_execute $valgrind_execute $server_prog $server_args\n";
+#$server_pid = open(SERVER, "$libtool_execute valgrind --log-file=$ENV{PWD}/valgrind.log $server_prog $server_args |");
 $server_pid = open(SERVER, "$libtool_execute $server_prog $server_args |");
  
 if($server_pid == -1)
