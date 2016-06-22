@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>globus_dsi_rest: globus_dsi_rest_write_block_arg_s Struct Reference</title>
+<title>globus_dsi_rest: globus_dsi_rest_gridftp_op_arg_s Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -87,49 +87,64 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">globus_dsi_rest_write_block_arg_s Struct Reference<div class="ingroups"><a class="el" href="group__globus__dsi__rest__callback__specializations.html">Callback Specializations</a></div></div>  </div>
+<div class="title">globus_dsi_rest_gridftp_op_arg_s Struct Reference<div class="ingroups"><a class="el" href="group__globus__dsi__rest__callback__specializations.html">Callback Specializations</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Single-block write specialization data_write_callback_arg.  
- <a href="structglobus__dsi__rest__write__block__arg__s.html#details">More...</a></p>
+<p>GridFTP Operation write specialization data_write_callback_arg.  
+ <a href="structglobus__dsi__rest__gridftp__op__arg__s.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="globus__dsi__rest_8h_source.html">globus_dsi_rest.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a1c29f691a0cff37e37c089e8a437222b"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__write__block__arg__s.html#a1c29f691a0cff37e37c089e8a437222b">block_data</a></td></tr>
-<tr class="separator:a1c29f691a0cff37e37c089e8a437222b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acedb28d42f598f3fa97f99334bafaad8"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__write__block__arg__s.html#acedb28d42f598f3fa97f99334bafaad8">block_len</a></td></tr>
-<tr class="separator:acedb28d42f598f3fa97f99334bafaad8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa06b730becb826a7fc8704f2152eb2bf"><td class="memItemLeft" align="right" valign="top">globus_gfs_operation_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__gridftp__op__arg__s.html#aa06b730becb826a7fc8704f2152eb2bf">op</a></td></tr>
+<tr class="separator:aa06b730becb826a7fc8704f2152eb2bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24ddbbc76fe8fef7a40c21557eeacd3d"><td class="memItemLeft" align="right" valign="top">globus_off_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__gridftp__op__arg__s.html#a24ddbbc76fe8fef7a40c21557eeacd3d">offset</a></td></tr>
+<tr class="separator:a24ddbbc76fe8fef7a40c21557eeacd3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03dce68cc155e6ed093976f1b4231020"><td class="memItemLeft" align="right" valign="top">globus_off_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__gridftp__op__arg__s.html#a03dce68cc155e6ed093976f1b4231020">length</a></td></tr>
+<tr class="separator:a03dce68cc155e6ed093976f1b4231020"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Single-block write specialization data_write_callback_arg. </p>
-<p>A pointer to a data structure of this type must be be used as the data_write_callback_arg parameter when using the <a class="el" href="group__globus__dsi__rest__callback__specializations.html#ga115460ca017042c2d982998ea69ed2e1" title="Single-block write specialization of globus_dsi_rest_write_t. ">globus_dsi_rest_write_block()</a> function as the data_write_callback to <a class="el" href="group__globus__dsi__rest__api.html#ga5ae1accec863cf4177e64aa55cdf56e3" title="Perform a REST request. ">globus_dsi_rest_request()</a>. </p>
+<div class="textblock"><p>GridFTP Operation write specialization data_write_callback_arg. </p>
+<p>A pointer to a data structure of this type must be be used as the data_write_callback_arg parameter when using the <a class="el" href="group__globus__dsi__rest__callback__specializations.html#gab5e5cb64021239809cb842f956bc55b2" title="GridFTP operation write specialization of globus_dsi_rest_write_t. ">globus_dsi_rest_write_gridftp_op()</a> function as the data_write_callback to <a class="el" href="group__globus__dsi__rest__api.html#ga5ae1accec863cf4177e64aa55cdf56e3" title="Perform a REST request. ">globus_dsi_rest_request()</a>. </p>
 </div><h2 class="groupheader">Field Documentation</h2>
-<a class="anchor" id="a1c29f691a0cff37e37c089e8a437222b"></a>
+<a class="anchor" id="a03dce68cc155e6ed093976f1b4231020"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void* globus_dsi_rest_write_block_arg_s::block_data</td>
+          <td class="memname">globus_off_t globus_dsi_rest_gridftp_op_arg_s::length</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Data to send to the server </p>
+<p>The amount of data to expect. May be -1 to indicate all data. Currently ignored TODO: Add support for reading only a part of a GridFTP data stream at a time. </p>
 
 </div>
 </div>
-<a class="anchor" id="acedb28d42f598f3fa97f99334bafaad8"></a>
+<a class="anchor" id="a24ddbbc76fe8fef7a40c21557eeacd3d"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">size_t globus_dsi_rest_write_block_arg_s::block_len</td>
+          <td class="memname">globus_off_t globus_dsi_rest_gridftp_op_arg_s::offset</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Length of the data </p>
+<p>The start offset of the data </p>
+
+</div>
+</div>
+<a class="anchor" id="aa06b730becb826a7fc8704f2152eb2bf"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">globus_gfs_operation_t globus_dsi_rest_gridftp_op_arg_s::op</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The GridFTP operation </p>
 
 </div>
 </div>

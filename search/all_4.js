@@ -2,6 +2,8 @@ var searchData=
 [
   ['globus_5fdsi_5frest_2eh',['globus_dsi_rest.h',['../globus__dsi__rest_8h.html',1,'']]],
   ['globus_5fdsi_5frest_5fcomplete_5ft',['globus_dsi_rest_complete_t',['../group__globus__dsi__rest__callback__signatures.html#ga73ad6164ff3abc464e48553a06d6b084',1,'globus_dsi_rest.h']]],
+  ['globus_5fdsi_5frest_5fgridftp_5fop_5farg_5fs',['globus_dsi_rest_gridftp_op_arg_s',['../structglobus__dsi__rest__gridftp__op__arg__s.html',1,'']]],
+  ['globus_5fdsi_5frest_5fgridftp_5fop_5farg_5ft',['globus_dsi_rest_gridftp_op_arg_t',['../group__globus__dsi__rest__callback__specializations.html#ga8f5a78775282213962e642e370557b08',1,'globus_dsi_rest.h']]],
   ['globus_5fdsi_5frest_5fkey_5farray_5fs',['globus_dsi_rest_key_array_s',['../structglobus__dsi__rest__key__array__s.html',1,'']]],
   ['globus_5fdsi_5frest_5fkey_5farray_5ft',['globus_dsi_rest_key_array_t',['../group__globus__dsi__rest__data.html#ga33ced6c9e430229bd03adf9622be398c',1,'globus_dsi_rest.h']]],
   ['globus_5fdsi_5frest_5fkey_5fvalue_5fs',['globus_dsi_rest_key_value_s',['../structglobus__dsi__rest__key__value__s.html',1,'']]],

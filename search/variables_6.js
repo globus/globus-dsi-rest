@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['value',['value',['../structglobus__dsi__rest__key__value__s.html#a2e7004131f8e148738a63dee751c0ab0',1,'globus_dsi_rest_key_value_s']]]
+  ['offset',['offset',['../structglobus__dsi__rest__gridftp__op__arg__s.html#a24ddbbc76fe8fef7a40c21557eeacd3d',1,'globus_dsi_rest_gridftp_op_arg_s']]],
+  ['op',['op',['../structglobus__dsi__rest__gridftp__op__arg__s.html#aa06b730becb826a7fc8704f2152eb2bf',1,'globus_dsi_rest_gridftp_op_arg_s']]]
 ];
