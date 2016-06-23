@@ -1,3 +1,11 @@
+globus-dsi-rest (0.8-1+gt6.@distro@) @distro@; urgency=low
+
+  * Add TRACE level data on upload
+  * Explicit jansson flags
+  * When using LIBTOOL in tests, dlopen library
+
+ -- Globus Toolkit <support@globus.org>  Thu, 23 Jun 2016 12:37:24 -0400
+
 globus-dsi-rest (0.7-1+gt6.@distro@) @distro@; urgency=low
 
   * Add valgrind hook to tests
