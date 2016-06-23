@@ -48,12 +48,14 @@ AM_CPPFLAGS = \
 	$(GLOBUS_COMMON_CFLAGS) \
 	$(LIBCURL_CPPFLAGS) \
 	$(OPENSSL_CFLAGS) \
+	$(JANSSON_CFLAGS) \
 	-I$(top_srcdir)
 
 AM_LDFLAGS = \
 	$(GLOBUS_GRIDFTP_SERVER_LIBS) \
 	$(GLOBUS_COMMON_LIBS) \
 	$(LIBCURL) \
+	$(JANSSON_LIBS) \
 	$(OPENSSL_LIBS) \
 	../libglobus_dsi_rest.la
 
