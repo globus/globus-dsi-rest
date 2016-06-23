@@ -47,7 +47,7 @@ my $libtool_execute="";
 my $valgrind_execute="";
 if (exists $ENV{LIBTOOL})
 {
-    $libtool_execute = "$ENV{LIBTOOL} --mode=execute -dlopen libglobus_gridftp_server_dsi_rest.la"
+    $libtool_execute = "$ENV{LIBTOOL} --mode=execute -dlopen ../libglobus_dsi_rest.la -dlopen libglobus_gridftp_server_dsi_rest.la"
 }
 if (exists $ENV{VALGRIND})
 {
