@@ -34,6 +34,7 @@ libglobus_dsi_rest_la_SOURCES = \
 	handle_release.c \
 	header.c \
 	module.c \
+	multipart_boundary_prepare.c \
 	perform.c \
 	progress.c \
 	progress_idle_timeout.c \
@@ -51,6 +52,7 @@ libglobus_dsi_rest_la_SOURCES = \
 	write_data.c \
 	write_gridftp_op.c \
 	write_json.c \
+	write_multipart.c \
 	xferinfo.c
 
 EXTRA_DIST = $(doc_DATA)

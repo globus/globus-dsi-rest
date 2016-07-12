@@ -514,6 +514,74 @@ globus_dsi_rest_gridftp_op_arg_t;
 extern globus_dsi_rest_write_t const    globus_dsi_rest_write_gridftp_op;
 
 /**
+ * @brief Multipart write specialization data_write_callback_arg
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     A pointer to a data structure of this type must be be used as the
+ *     data_write_callback_arg parameter when using the
+ *     globus_dsi_rest_write_multipart() function as the data_write_callback
+ *     to globus_dsi_rest_request().
+ */
+typedef
+struct globus_dsi_rest_multipart_arg_s
+{
+    /** Number of parts for the multipart message */
+    size_t                              num_parts;
+    /** Array of num_parts elements, each containing a globus_dsi_rest_write_t
+     * function pointer to write the data for that part.
+     */
+    globus_dsi_rest_write_t            *part_writer;
+    /** Array of num_parts elements, each containing an argument to pass
+     * to the corresponding part_writer callback
+     * function pointer
+     */
+    void                              **part_writer_arg;
+    /**
+     * Array of num_parts elements, each containing a set of headers to add to
+     * the beginning of the part message. Any element in the array 
+     * may contain an empty set of headers.
+     */
+    globus_dsi_rest_key_array_t        *part_header;
+}
+globus_dsi_rest_multipart_arg_t;
+
+/**
+ * @brief Multipart write specialization of globus_dsi_rest_write_t
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     This function implements the globus_dsi_rest_write_t interface
+ *     and is intended to be used in the situation when the data to send
+ *     to the REST server is multipart message.
+ *
+ *     The write_callback_arg used with this function
+ *     <b>MUST BE</b> a pointer to a globus_dsi_rest_multipart_arg_t.
+ *
+ *     If the headers for the message contain a Content-Type
+ *     type that is a multipart type, then the header is scanned for a boundary.
+ *     If no Content-Type header is included, a multipart/related header is
+ *     used and a boundary is created internally. If the Content-Type is
+ *     included and is a non-multipart type, then no boundary is used, and the
+ *     different parts are concatenated without any boundary.
+ *
+ *     The part_writer, part_writer_arg, and part_header arrays all contain
+ *     num_parts elements. 
+ *
+ *     For each part, this function serializes the part_header array as
+ *     a set of HTTP headers for the message part. The array may be empty,
+ *     either to include no headers for a part, or because this message is
+ *     not a multipart/related message.
+ *
+ *     Then, this function sends the data by calling the part_writer repeatedly,
+ *     passing the part_writer_arg as normal. When that function returns 0
+ *     bytes written or an error, then this function will (if defined) write
+ *     the mulitpart boundary, and then continue to the next element in the
+ *     array.
+ *
+ *     This function may be used to compose any of the other available write
+ *     specializations into a multipart message.
+ */
+extern globus_dsi_rest_write_t const    globus_dsi_rest_write_multipart;
+/**
  * @brief JSON read specialization of globus_dsi_rest_read_t
  * @ingroup globus_dsi_rest_callback_specializations
  * @details

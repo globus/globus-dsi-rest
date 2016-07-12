@@ -247,7 +247,7 @@ int main()
     for (size_t i = 0; i < sizeof(json_tests)/sizeof(json_tests[0]); i++)
     {
         json_t *json;
-        struct json_reader_s  json_out = {0};
+        struct json_reader_s  json_out = {.offset=0};
         bool ok = true, transport_ok = true, download_ok = true;
         char uri_fmt[] = "http://%s/echo";
         size_t uri_len = strlen(contact_string) + sizeof(uri_fmt);
