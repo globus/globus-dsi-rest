@@ -62,7 +62,7 @@ globus_i_dsi_rest_header(
         GlobusDsiRestDebug("%.*s", (int) (size*nitems), buffer); 
     }
 
-    if (request->callbacks.response_callback == NULL)
+    if (request->response_callback == NULL)
     {
         /* Don't bother parsing if client doesn't care */
         goto done;
@@ -144,8 +144,8 @@ globus_i_dsi_rest_header(
         }
         else
         {
-            result = request->callbacks.response_callback(
-                request->callbacks.response_callback_arg,
+            result = request->response_callback(
+                request->response_callback_arg,
                 request->response_code,
                 request->response_reason,
                 &request->response_headers);

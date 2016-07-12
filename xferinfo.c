@@ -35,10 +35,10 @@ globus_i_dsi_rest_xferinfo(
     int                                 rc = 0;
 
     GlobusDsiRestEnter();
-    if (request->callbacks.progress_callback != NULL)
+    if (request->progress_callback != NULL)
     {
-        result = request->callbacks.progress_callback(
-                request->callbacks.progress_callback_arg,
+        result = request->progress_callback(
+                request->progress_callback_arg,
                 (uint64_t) dltotal,
                 (uint64_t) dlnow,
                 (uint64_t) ultotal,

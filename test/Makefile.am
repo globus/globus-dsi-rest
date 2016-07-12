@@ -16,6 +16,7 @@ check_PROGRAMS = \
 	write-block-test \
 	write-form-test \
 	write-json-test \
+	write-multipart-test \
 	uri-add-query-test \
 	uri-escape-test
 
@@ -83,6 +84,9 @@ write_form_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 write_json_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 write_json_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
+
+write_multipart_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
+write_multipart_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 testcred.key:
 	umask 077; openssl genrsa 1024 > $@

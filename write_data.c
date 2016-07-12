@@ -54,10 +54,10 @@ globus_i_dsi_rest_write_data(
         free(q);
     }
 
-    if (request->callbacks.data_read_callback != NULL)
+    if (request->data_read_callback != NULL)
     {
-        result = request->callbacks.data_read_callback(
-                request->callbacks.data_read_callback_arg,
+        result = request->data_read_callback(
+                request->data_read_callback_arg,
                 ptr,
                 data_processed);
     }

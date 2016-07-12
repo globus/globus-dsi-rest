@@ -86,6 +86,36 @@ struct globus_i_dsi_rest_gridftp_op_arg_s
 }
 globus_i_dsi_rest_gridftp_op_arg_t;
 
+
+typedef
+struct globus_i_dsi_rest_multipart_arg_s
+{
+    char                               *boundary;
+    size_t                              num_parts;
+    size_t                              part_index;
+    char                               *current_boundary;
+    size_t                              current_boundary_offset;
+    size_t                              current_boundary_length;
+    struct globus_i_dsi_rest_part_s    *parts;
+}
+globus_i_dsi_rest_multipart_arg_t;
+
+typedef
+struct globus_i_dsi_rest_part_s
+{
+    globus_dsi_rest_key_array_t         headers;
+    globus_dsi_rest_key_array_t         malloced_headers;
+
+    globus_dsi_rest_write_t             data_write_callback;
+    void                               *data_write_callback_arg;
+
+    globus_dsi_rest_write_block_arg_t   write_block_callback_arg;
+    globus_dsi_rest_write_block_arg_t   write_block_callback_arg_orig;
+    globus_i_dsi_rest_gridftp_op_arg_t  gridftp_op_arg;
+    globus_i_dsi_rest_multipart_arg_t   multipart_write_arg;
+}
+globus_i_dsi_rest_part_t;
+
 /**
  * @brief Data Structure for request state
  */
@@ -101,13 +131,24 @@ struct globus_i_dsi_rest_request_s
     globus_dsi_rest_key_array_t         response_headers;
     char                               *complete_uri;
 
-    globus_dsi_rest_callbacks_t         callbacks;
     globus_thread_t                     thread;
 
-    globus_dsi_rest_write_block_arg_t   write_block_callback_arg;
-    globus_dsi_rest_write_block_arg_t   write_block_callback_arg_orig;
+    globus_i_dsi_rest_part_t            write_part;
     globus_i_dsi_rest_read_json_arg_t   read_json_arg;
-    globus_i_dsi_rest_gridftp_op_arg_t  gridftp_op_arg;
+    globus_i_dsi_rest_gridftp_op_arg_t  read_gridftp_op_arg;
+
+    globus_dsi_rest_read_t              data_read_callback;
+    void                               *data_read_callback_arg;
+
+    globus_dsi_rest_response_t          response_callback;
+    void                               *response_callback_arg;
+
+    globus_dsi_rest_complete_t          complete_callback;
+    void                               *complete_callback_arg;
+
+    globus_dsi_rest_progress_t          progress_callback;
+    void                               *progress_callback_arg;
+
     globus_i_dsi_rest_idle_arg_t        idle_arg;
 
     uint64_t                            request_content_length;
@@ -188,6 +229,14 @@ globus_i_dsi_rest_uri_escape(
     const char                         *raw,
     char                              **encodedp,
     size_t                             *availablep);
+
+globus_result_t
+globus_i_dsi_rest_multipart_boundary_prepare(
+    const char                         *delimiter,
+    bool                                final,
+    globus_dsi_rest_key_array_t        *part_header,
+    char                              **boundaryp,
+    size_t                             *boundary_lengthp);
 
 void
 globus_i_dsi_rest_request_cleanup(

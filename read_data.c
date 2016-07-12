@@ -35,10 +35,10 @@ globus_i_dsi_rest_read_data(
 
     GlobusDsiRestEnter();
 
-    if (request->callbacks.data_write_callback != NULL)
+    if (request->write_part.data_write_callback != NULL)
     {
-        result = request->callbacks.data_write_callback(
-                request->callbacks.data_write_callback_arg,
+        result = request->write_part.data_write_callback(
+                request->write_part.data_write_callback_arg,
                 buffer,
                 size * nitems,
                 &processed);

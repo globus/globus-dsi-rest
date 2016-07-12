@@ -46,6 +46,7 @@ globus_l_dsi_rest_read_gridftp_op(
 {
     globus_i_dsi_rest_gridftp_op_arg_t *gridftp_op_arg = read_callback_arg;
     globus_result_t                     result = GLOBUS_SUCCESS;
+    bool                                eof = (buffer_length == 0);
 
     GlobusDsiRestEnter();
 
@@ -109,6 +110,16 @@ globus_l_dsi_rest_read_gridftp_op(
     }
 
     result = globus_l_dsi_rest_send_pending(gridftp_op_arg);
+
+    if (eof)
+    {
+        while (gridftp_op_arg->registered_buffers != NULL)
+        {
+            globus_cond_wait(
+                    &gridftp_op_arg->cond,
+                    &gridftp_op_arg->mutex);
+        }
+    }
 
     globus_mutex_unlock(&gridftp_op_arg->mutex);
 out:
