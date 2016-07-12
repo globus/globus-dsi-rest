@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>globus_dsi_rest: globus_dsi_rest_key_value_s Struct Reference</title>
+<title>globus_dsi_rest: globus_dsi_rest_multipart_arg_s Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -87,49 +87,79 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">globus_dsi_rest_key_value_s Struct Reference<div class="ingroups"><a class="el" href="group__globus__dsi__rest__data.html">Data Types</a></div></div>  </div>
+<div class="title">globus_dsi_rest_multipart_arg_s Struct Reference<div class="ingroups"><a class="el" href="group__globus__dsi__rest__callback__specializations.html">Callback Specializations</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Key-Value Pairs.  
- <a href="structglobus__dsi__rest__key__value__s.html#details">More...</a></p>
+<p>Multipart write specialization data_write_callback_arg.  
+ <a href="structglobus__dsi__rest__multipart__arg__s.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="globus__dsi__rest_8h_source.html">globus_dsi_rest.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:acab540b70b3bbfd7836c8e2f395766ae"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__key__value__s.html#acab540b70b3bbfd7836c8e2f395766ae">key</a></td></tr>
-<tr class="separator:acab540b70b3bbfd7836c8e2f395766ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e7004131f8e148738a63dee751c0ab0"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__key__value__s.html#a2e7004131f8e148738a63dee751c0ab0">value</a></td></tr>
-<tr class="separator:a2e7004131f8e148738a63dee751c0ab0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e59e8932992ef7f1a0f55094049602d"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__multipart__arg__s.html#a4e59e8932992ef7f1a0f55094049602d">num_parts</a></td></tr>
+<tr class="separator:a4e59e8932992ef7f1a0f55094049602d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e21e77da0284722c44cca31da75340f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__globus__dsi__rest__callback__signatures.html#ga0f730539a100253d79e5e86d044825ca">globus_dsi_rest_write_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__multipart__arg__s.html#a7e21e77da0284722c44cca31da75340f">part_writer</a></td></tr>
+<tr class="separator:a7e21e77da0284722c44cca31da75340f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4533c2ce47b7059b503417046909d4b2"><td class="memItemLeft" align="right" valign="top">void **&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__multipart__arg__s.html#a4533c2ce47b7059b503417046909d4b2">part_writer_arg</a></td></tr>
+<tr class="separator:a4533c2ce47b7059b503417046909d4b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a966d7111a7cb45d919598a8ea23c57fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__globus__dsi__rest__data.html#ga33ced6c9e430229bd03adf9622be398c">globus_dsi_rest_key_array_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__multipart__arg__s.html#a966d7111a7cb45d919598a8ea23c57fa">part_header</a></td></tr>
+<tr class="separator:a966d7111a7cb45d919598a8ea23c57fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Key-Value Pairs. </p>
-<p>This data type is used to express both URI query parameters and HTTP headers. Values are encoded as appropriate for the particular use of the data. </p>
+<div class="textblock"><p>Multipart write specialization data_write_callback_arg. </p>
+<p>A pointer to a data structure of this type must be be used as the data_write_callback_arg parameter when using the <a class="el" href="group__globus__dsi__rest__callback__specializations.html#ga0417d19a3eeb27a45bfef0d048266023" title="Multipart write specialization of globus_dsi_rest_write_t. ">globus_dsi_rest_write_multipart()</a> function as the data_write_callback to <a class="el" href="group__globus__dsi__rest__api.html#ga5ae1accec863cf4177e64aa55cdf56e3" title="Perform a REST request. ">globus_dsi_rest_request()</a>. </p>
 </div><h2 class="groupheader">Field Documentation</h2>
-<a class="anchor" id="acab540b70b3bbfd7836c8e2f395766ae"></a>
+<a class="anchor" id="a4e59e8932992ef7f1a0f55094049602d"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const char* globus_dsi_rest_key_value_s::key</td>
+          <td class="memname">size_t globus_dsi_rest_multipart_arg_s::num_parts</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Key name (null terminated) </p>
+<p>Number of parts for the multipart message </p>
 
 </div>
 </div>
-<a class="anchor" id="a2e7004131f8e148738a63dee751c0ab0"></a>
+<a class="anchor" id="a966d7111a7cb45d919598a8ea23c57fa"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const char* globus_dsi_rest_key_value_s::value</td>
+          <td class="memname"><a class="el" href="group__globus__dsi__rest__data.html#ga33ced6c9e430229bd03adf9622be398c">globus_dsi_rest_key_array_t</a>* globus_dsi_rest_multipart_arg_s::part_header</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Value (null terminated) </p>
+<p>Array of num_parts elements, each containing a set of headers to add to the beginning of the part message. Any element in the array may contain an empty set of headers. </p>
+
+</div>
+</div>
+<a class="anchor" id="a7e21e77da0284722c44cca31da75340f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__globus__dsi__rest__callback__signatures.html#ga0f730539a100253d79e5e86d044825ca">globus_dsi_rest_write_t</a>* globus_dsi_rest_multipart_arg_s::part_writer</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Array of num_parts elements, each containing a globus_dsi_rest_write_t function pointer to write the data for that part. </p>
+
+</div>
+</div>
+<a class="anchor" id="a4533c2ce47b7059b503417046909d4b2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void** globus_dsi_rest_multipart_arg_s::part_writer_arg</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Array of num_parts elements, each containing an argument to pass to the corresponding part_writer callback function pointer </p>
 
 </div>
 </div>
