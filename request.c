@@ -33,31 +33,27 @@ globus_l_dsi_rest_prepare_write_callbacks(
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_multipart_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    globus_dsi_rest_multipart_arg_t    *parts,
-    globus_i_dsi_rest_part_t           *current_part);
+    globus_i_dsi_rest_part_t           *current_part,
+    globus_dsi_rest_multipart_arg_t    *parts);
 
 
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_json_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    json_t                             *json,
-    globus_i_dsi_rest_part_t           *current_part);
+    globus_i_dsi_rest_part_t           *current_part,
+    json_t                             *json);
 
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_form_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    globus_dsi_rest_key_array_t        *form,
-    globus_i_dsi_rest_part_t           *current_part);
+    globus_i_dsi_rest_part_t           *current_part,
+    globus_dsi_rest_key_array_t        *form);
 
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_gridftp_op_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg,
-    globus_i_dsi_rest_part_t           *current_part);
+    globus_i_dsi_rest_part_t           *current_part,
+    globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg);
 
 static
 globus_result_t
@@ -292,9 +288,8 @@ globus_l_dsi_rest_prepare_write_callbacks(
     if (data_write_callback == globus_dsi_rest_write_multipart)
     {
         result = globus_l_dsi_rest_prepare_write_multipart_callback(
-                headers,
-                data_write_callback_arg,
-                current_part);
+                current_part,
+                data_write_callback_arg);
     }
     else if (data_write_callback == globus_dsi_rest_write_block)
     {
@@ -310,24 +305,20 @@ globus_l_dsi_rest_prepare_write_callbacks(
     else if (data_write_callback == globus_dsi_rest_write_json)
     {
         result = globus_l_dsi_rest_prepare_write_json_callback(
-                headers,
-                data_write_callback_arg,
-                current_part);
+                current_part,
+                data_write_callback_arg);
     }
     else if (data_write_callback == globus_dsi_rest_write_form)
     {
         result = globus_l_dsi_rest_prepare_write_form_callback(
-                headers,
-                data_write_callback_arg,
-                current_part);
+                current_part,
+                data_write_callback_arg);
     }
     else if (data_write_callback == globus_dsi_rest_write_gridftp_op)
     {
         result = globus_l_dsi_rest_prepare_write_gridftp_op_callback(
-                headers,
-                data_write_callback_arg,
-                current_part);
-
+                current_part,
+                data_write_callback_arg);
     }
 
     if (result != GLOBUS_SUCCESS)
@@ -344,9 +335,8 @@ headers_alloc_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_multipart_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    globus_dsi_rest_multipart_arg_t    *parts,
-    globus_i_dsi_rest_part_t           *current_part)
+    globus_i_dsi_rest_part_t           *current_part,
+    globus_dsi_rest_multipart_arg_t    *parts)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
     globus_i_dsi_rest_multipart_arg_t  *multipart_write_arg = NULL;
@@ -370,7 +360,7 @@ globus_l_dsi_rest_prepare_write_multipart_callback(
      * type and add it to the headers list.
      */
     globus_l_dsi_rest_headers_search(
-            headers,
+            &current_part->headers,
             "Content-Type",
             &content_type_header);
     if (content_type_header != NULL)
@@ -380,7 +370,7 @@ globus_l_dsi_rest_prepare_write_multipart_callback(
         if (strncmp(content_type_header, "multipart/", 10) == 0 &&
             (b = strstr(content_type_header, "boundary=")) != NULL)
         {
-            b += 8;
+            b += 9;
             c = b;
             while (*c != 0 && !isspace(*c))
             {
@@ -423,18 +413,6 @@ globus_l_dsi_rest_prepare_write_multipart_callback(
             goto add_part_header_fail;
         }
     }
-    /* If we have a multipart boundary string, add the initial boundary
-     * and headers for the first part
-     */
-    if (multipart_write_arg->boundary != NULL)
-    {
-        result = globus_i_dsi_rest_multipart_boundary_prepare(
-                multipart_write_arg->boundary,
-                false,
-                &parts->part_header[0],
-                &multipart_write_arg->current_boundary,
-                &multipart_write_arg->current_boundary_length);
-    }
     /*
      * Recursively add parts to the multipart_write_arg
      */
@@ -448,9 +426,26 @@ globus_l_dsi_rest_prepare_write_multipart_callback(
                 &parts->part_header[i],
                 parts->part_writer[i],
                 parts->part_writer_arg[i]);
+        if (result != GLOBUS_SUCCESS)
+        {
+            goto part_prepare_fail;
+        }
+    }
+    /* If we have a multipart boundary string, add the initial boundary
+     * and headers for the first part
+     */
+    if (multipart_write_arg->boundary != NULL)
+    {
+        result = globus_i_dsi_rest_multipart_boundary_prepare(
+                multipart_write_arg->boundary,
+                false,
+                &multipart_write_arg->parts[0].headers,
+                &multipart_write_arg->current_boundary,
+                &multipart_write_arg->current_boundary_length);
     }
     if (result != GLOBUS_SUCCESS)
     {
+part_prepare_fail:
 add_part_header_fail:
         free(multipart_write_arg->boundary);
     }
@@ -463,9 +458,8 @@ boundary_malloc_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_json_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    json_t                             *json,
-    globus_i_dsi_rest_part_t           *current_part)
+    globus_i_dsi_rest_part_t           *current_part,
+    json_t                             *json)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
     char                               *jstring = NULL;
@@ -506,9 +500,8 @@ json_encode_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_form_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    globus_dsi_rest_key_array_t        *form,
-    globus_i_dsi_rest_part_t           *current_part)
+    globus_i_dsi_rest_part_t           *current_part,
+    globus_dsi_rest_key_array_t        *form)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
     char                               *form_data = NULL;
@@ -550,9 +543,8 @@ form_encode_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_gridftp_op_callback(
-    const globus_dsi_rest_key_array_t  *headers,
-    globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg,
-    globus_i_dsi_rest_part_t           *current_part)
+    globus_i_dsi_rest_part_t           *current_part,
+    globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
     int                                 rc = 0;

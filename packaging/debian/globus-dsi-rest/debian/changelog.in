@@ -1,11 +1,4 @@
-globus-dsi-rest (0.9-1+gt6.@distro@) @distro@; urgency=low
-
-  * Add new writer for sending data from multiple write callbacks,
-    optionally adding multipart mime boundaries
-
- -- Globus Toolkit <support@globus.org>  Tue, 12 Jul 2016 06:39:28 -0400
-
-globus-dsi-rest (0.8-1+gt6.@distro@) @distro@; urgency=low
+globus-dsi-rest (0.10-1+gt6.@distro@) @distro@; urgency=low
 
   * Add new writer for sending data from multiple write callbacks,
     optionally adding multipart mime boundaries
