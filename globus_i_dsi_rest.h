@@ -405,11 +405,16 @@ extern const char * globus_i_dsi_rest_debug_level_names[];
         if (level__ > GLOBUS_DSI_REST_ERROR || level__  < 0) { \
             level__ = 1; \
         } \
-        GlobusDebugPrintf(GLOBUS_DSI_REST, level__, \
+        if (GlobusDebugTrue(GLOBUS_DSI_REST, level__)) \
+        { \
+            flockfile(GlobusDebugMyFile(GLOBUS_DSI_REST)); \
+            GlobusDebugPrintf(GLOBUS_DSI_REST, level__, \
             ("dsi_rest: %5s: %s: ", \
              globus_i_dsi_rest_debug_level_names[level__], __func__)); \
-        GlobusDebugPrintf(GLOBUS_DSI_REST, level__, \
-            (__VA_ARGS__)); \
+            GlobusDebugMyPrintf(GLOBUS_DSI_REST, \
+                (__VA_ARGS__)); \
+            funlockfile(GlobusDebugMyFile(GLOBUS_DSI_REST)); \
+        } \
     } while (0)
 
 #define GlobusDsiRestTrace(...) GlobusDsiRestLog(GLOBUS_DSI_REST_TRACE, __VA_ARGS__)
@@ -435,6 +440,11 @@ extern const char * globus_i_dsi_rest_debug_level_names[];
 #define GlobusDsiRestExitBool(rc)  GlobusDsiRestTrace("exit: %s\n", rc?"true":"false")
 #define GlobusDsiRestExitPointer(p)  GlobusDsiRestTrace("exit: %p\n", (void *)p)
 
+extern globus_mutex_t                   globus_i_dsi_rest_handle_cache_mutex;
+extern size_t                           globus_i_dsi_rest_handle_cache_index;
+extern CURL                            *globus_i_dsi_rest_handle_cache[];
+
+enum { GLOBUS_I_DSI_REST_HANDLE_CACHE_SIZE = 16 };
 
 #ifdef __cplusplus
 }

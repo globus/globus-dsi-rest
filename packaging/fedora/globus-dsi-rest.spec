@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.10
+Version:	0.11
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Wed Jul 13 2016 Globus Toolkit <support@globus.org> - 0.11-1
+- Add handle cache
+- Add support for partial reads from gridftp_op to write to http server
+
 * Tue Jul 12 2016 Globus Toolkit <support@globus.org> - 0.10-1
 - Add new writer for sending data from multiple write callbacks,
   optionally adding multipart mime boundaries

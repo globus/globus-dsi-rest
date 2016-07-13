@@ -28,8 +28,27 @@ globus_i_dsi_rest_handle_release(
 {
     GlobusDsiRestEnter();
 
-    /* TODO: Handle cache */
-    curl_easy_cleanup(handle);
+    if (handle != NULL)
+    {
+        curl_easy_reset(handle);
+    }
+
+    globus_mutex_lock(&globus_i_dsi_rest_handle_cache_mutex);
+    if (globus_i_dsi_rest_handle_cache_index < GLOBUS_I_DSI_REST_HANDLE_CACHE_SIZE)
+    {
+        if (handle != NULL)
+        {
+            globus_i_dsi_rest_handle_cache[
+                    globus_i_dsi_rest_handle_cache_index++] = handle;
+            handle = NULL;
+        }
+    }
+    globus_mutex_unlock(&globus_i_dsi_rest_handle_cache_mutex);
+
+    if (handle != NULL)
+    {
+        curl_easy_cleanup(handle);
+    }
 
     GlobusDsiRestExit();
     return;

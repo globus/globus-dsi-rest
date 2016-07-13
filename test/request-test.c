@@ -245,6 +245,7 @@ void *server_thread(void *arg)
             globus_xio_http_version_t   http_version;
             globus_hashtable_t          headers;
             globus_size_t               nbytes;
+            bool                        eof = false;
             unsigned char               upbuf[64];
             struct test_case            bad_test = 
             {
@@ -265,6 +266,21 @@ void *server_thread(void *arg)
                     0,
                     &nbytes,
                     descriptor);
+
+            if (result != GLOBUS_SUCCESS &&
+                (globus_error_match(
+                    globus_error_peek(result),
+                    GLOBUS_XIO_MODULE,
+                    GLOBUS_XIO_ERROR_EOF)
+                || globus_xio_driver_error_match(
+                        http_driver,
+                        globus_error_peek(result),
+                        GLOBUS_XIO_HTTP_ERROR_EOF)))
+            {
+                eof = true;
+                result = GLOBUS_SUCCESS;
+            }
+
 
             result = globus_xio_data_descriptor_cntl(
                     descriptor,
@@ -303,7 +319,7 @@ void *server_thread(void *arg)
                 {
                     test->server_read_offset = nbytes;
                 }
-                while (test->server_read_offset < body_len)
+                while ((!eof) && test->server_read_offset < body_len)
                 {
                     result = globus_xio_read(
                             xio_handle,
@@ -370,15 +386,16 @@ void *server_thread(void *arg)
                     free(errstr);
                     goto end_this_socket;
                 }
+                result = globus_xio_handle_cntl(xio_handle,
+                        http_driver,
+                        GLOBUS_XIO_HTTP_HANDLE_SET_END_OF_ENTITY);
             }
-            result = globus_xio_handle_cntl(xio_handle,
-                    http_driver,
-                    GLOBUS_XIO_HTTP_HANDLE_SET_END_OF_ENTITY);
 
         end_this_socket:
             if (descriptor != NULL)
             {
                 globus_xio_data_descriptor_destroy(descriptor);
+                descriptor = NULL;
             }
             globus_xio_close(xio_handle, NULL);
             xio_handle = NULL;

@@ -83,6 +83,19 @@ void *server_thread(void *arg)
                     &nbytes,
                     descriptor);
 
+            if (result != GLOBUS_SUCCESS &&
+                (globus_error_match(
+                    globus_error_peek(result),
+                    GLOBUS_XIO_MODULE,
+                    GLOBUS_XIO_ERROR_EOF)
+                || globus_xio_driver_error_match(
+                        http_driver,
+                        globus_error_peek(result),
+                        GLOBUS_XIO_HTTP_ERROR_EOF)))
+            {
+                result = GLOBUS_SUCCESS;
+            }
+
             result = globus_xio_data_descriptor_cntl(
                     descriptor,
                     http_driver,
@@ -92,6 +105,7 @@ void *server_thread(void *arg)
                     &http_version,
                     &headers);
 
+            fprintf(stderr, "# %s %s\n", method, uri);
             if (result != GLOBUS_SUCCESS)
             {
                 globus_xio_close(xio_handle, NULL);
@@ -128,14 +142,11 @@ void *server_thread(void *arg)
                         test->location);
             }
 
-            result = globus_xio_handle_cntl(xio_handle,
-                        http_driver,
-                        GLOBUS_XIO_HTTP_HANDLE_SET_END_OF_ENTITY);
-
         end_this_socket:
             if (descriptor != NULL)
             {
                 globus_xio_data_descriptor_destroy(descriptor);
+                descriptor = NULL;
             }
             globus_xio_close(xio_handle, NULL);
             xio_handle = NULL;
@@ -324,7 +335,8 @@ int main()
                 }
                 else
                 {
-                    if (strcmp(
+                    if (response_arg.desired_headers.key_value[j].value == NULL
+                        || strcmp(
                                 response_arg.desired_headers.key_value[j].value,
                                 tests[i].location) != 0)
                     {

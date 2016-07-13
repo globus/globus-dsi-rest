@@ -488,10 +488,9 @@ struct globus_dsi_rest_gridftp_op_arg_s
     /** The start offset of the data */
     globus_off_t                        offset;
     /**
-     * The amount of data to expect. May be -1 to indicate all data.
-     * Currently ignored
-     * TODO: Add support for reading only a part of a GridFTP data stream
-     * at a time.
+     * The amount of data to read from the GridFTP op.
+     * May be -1 to indicate all data. If this is not -1, then
+     * the DSI must force ordered data on the gridftp op.
      */
     globus_off_t                        length;
 }

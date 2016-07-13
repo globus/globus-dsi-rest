@@ -53,6 +53,10 @@ struct test_case                        tests[] =
     },
 };
 
+globus_mutex_t server_done_mutex;
+globus_cond_t server_done_cond;
+bool server_done;
+
 static
 globus_result_t
 response_callback(
@@ -186,6 +190,12 @@ void *server_thread(void *arg)
         }
     }
     globus_xio_server_close(xio_server);
+
+    globus_mutex_lock(&server_done_mutex);
+    server_done = true;
+    globus_cond_signal(&server_done_cond);
+    globus_mutex_unlock(&server_done_mutex);
+
     return 0;
 }
 
@@ -298,9 +308,14 @@ int main()
             rc++;
         }
     }
+    globus_mutex_lock(&server_done_mutex);
+    while (!server_done)
+    {
+        globus_cond_wait(&server_done_cond, &server_done_mutex);
+    }
+    globus_mutex_unlock(&server_done_mutex);
     free(contact_string);
-    globus_module_deactivate(GLOBUS_DSI_REST_MODULE);
-    globus_module_deactivate(GLOBUS_XIO_MODULE);
+    globus_module_deactivate_all();
     curl_global_cleanup();
     return rc;
 }

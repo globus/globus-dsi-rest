@@ -63,15 +63,25 @@ globus_l_dsi_rest_perform_thread(
     void                               *thread_arg)
 {
     globus_i_dsi_rest_request_t        *request = thread_arg;
+    globus_dsi_rest_complete_t          complete_callback;
+    void                               *complete_callback_arg;
     globus_result_t                     result;
 
     result = globus_l_dsi_rest_perform(request);
 
-    request->complete_callback(
-            request->complete_callback_arg,
-            (result!=GLOBUS_SUCCESS) ? result : request->result);
+    complete_callback = request->complete_callback;
+    complete_callback_arg = request->complete_callback_arg;
+
+    if (result == GLOBUS_SUCCESS)
+    {
+        result = request->result;
+    }
 
     globus_i_dsi_rest_request_cleanup(request);
+
+    complete_callback(
+            complete_callback_arg,
+            result);
 
     return NULL;
 }

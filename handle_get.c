@@ -27,14 +27,23 @@ globus_i_dsi_rest_handle_get(
     CURL                              **handlep,
     void                               *callback_arg)
 {
-    CURL                               *curl;
+    CURL                               *curl = NULL;
     CURLcode                            rc;
     globus_result_t                     result = GLOBUS_SUCCESS;
 
     GlobusDsiRestEnter();
 
-    /* TODO: Handle cache */
-    curl = curl_easy_init();
+    globus_mutex_lock(&globus_i_dsi_rest_handle_cache_mutex);
+    if (globus_i_dsi_rest_handle_cache_index > 0)
+    {
+        curl = globus_i_dsi_rest_handle_cache[--globus_i_dsi_rest_handle_cache_index];
+    }
+    globus_mutex_unlock(&globus_i_dsi_rest_handle_cache_mutex);
+
+    if (curl == NULL)
+    {
+        curl = curl_easy_init();
+    }
 
     if (curl == NULL)
     {

@@ -33,10 +33,11 @@ my $server_prog = $ENV{GRIDFTP_SERVER_EXE} || "globus-gridftp-server";
 my $server_host = "localhost";
 my $subject;
 
+$ENV{GLOBUS_ERROR_VERBOSE}="1";
 my $tmpdir = File::Temp::tempdir(CLEANUP => 1);
 $ENV{TEMPDIR} = $tmpdir;
 
-my $server_args = "-no-fork -no-chdir -d 0 -auth-level 4 -p 0 -dsi dsi_rest:$tmpdir -threads 2";
+my $server_args = "-no-fork -no-chdir -d 0 -auth-level 4 -p 0 -dsi dsi_rest:$tmpdir -threads 2 -l gridftp.$$.log";
 
 chomp($subject = `openssl x509 -subject -noout -in \${X509_USER_CERT:-testcred.cert}`);
 $subject =~ s/^subject= *//;

@@ -1,3 +1,10 @@
+globus-dsi-rest (0.11-1+gt6.@distro@) @distro@; urgency=low
+
+  * Add handle cache
+  * Add support for partial reads from gridftp_op to write to http server
+
+ -- Globus Toolkit <support@globus.org>  Wed, 13 Jul 2016 12:08:48 -0400
+
 globus-dsi-rest (0.10-1+gt6.@distro@) @distro@; urgency=low
 
   * Add new writer for sending data from multiple write callbacks,

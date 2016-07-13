@@ -26,6 +26,10 @@ const char *                            globus_i_dsi_rest_debug_level_names[] =
     [GLOBUS_DSI_REST_ERROR]           = "ERROR"
 };
 
+globus_mutex_t                          globus_i_dsi_rest_handle_cache_mutex;
+size_t                                  globus_i_dsi_rest_handle_cache_index;
+CURL                                   *globus_i_dsi_rest_handle_cache[GLOBUS_I_DSI_REST_HANDLE_CACHE_SIZE];
+
 GlobusDebugDefine(GLOBUS_DSI_REST);
 
 static
@@ -43,8 +47,20 @@ globus_l_dsi_rest_activate(void)
     {
         goto activate_fail;
     }
+    rc = globus_mutex_init(&globus_i_dsi_rest_handle_cache_mutex, NULL);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto mutex_init_fail;
+    }
+    globus_i_dsi_rest_handle_cache_index = 0;
+
     GlobusDebugInit(GLOBUS_DSI_REST, TRACE INFO DEBUG WARN ERROR);
 
+mutex_init_fail:
+    if (rc != 0)
+    {
+        globus_module_deactivate(GLOBUS_COMMON_MODULE);
+    }
 activate_fail:
 fail:
     return rc;
@@ -55,6 +71,13 @@ static
 int
 globus_l_dsi_rest_deactivate(void)
 {
+    globus_mutex_lock(&globus_i_dsi_rest_handle_cache_mutex);
+    while (globus_i_dsi_rest_handle_cache_index > 0)
+    {
+        curl_easy_cleanup(globus_i_dsi_rest_handle_cache[--globus_i_dsi_rest_handle_cache_index]);
+    }
+    globus_mutex_unlock(&globus_i_dsi_rest_handle_cache_mutex);
+
     globus_module_deactivate(GLOBUS_COMMON_MODULE);
     curl_global_cleanup();
 

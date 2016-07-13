@@ -268,6 +268,7 @@ globus_l_dsi_rest_write_register_reads(
 {
     globus_i_dsi_rest_buffer_t         *buffer;
     globus_size_t                       optimal_blocksize;
+    globus_off_t                        bytes_registered = 0;
     int                                 optimal_concurrency;
     int                                 currently_registered;
     globus_result_t                     result = GLOBUS_SUCCESS;
@@ -280,11 +281,14 @@ globus_l_dsi_rest_write_register_reads(
     while (buffer != NULL)
     {
         currently_registered++;
+        bytes_registered += buffer->buffer_len - buffer->buffer_used;
+
         buffer = buffer->next;
     }
     GlobusDsiRestTrace(
-            "Currently %d blocks registered\n",
-            currently_registered);
+            "Currently %d blocks registered for %"GLOBUS_OFF_T_FORMAT" bytes\n",
+            currently_registered,
+            bytes_registered);
 
     /* TODO: check against total length of operation so that we can support
      * partial or restarted transfers
@@ -304,6 +308,8 @@ globus_l_dsi_rest_write_register_reads(
 
         for (int i = currently_registered; i < optimal_concurrency; i++)
         {
+            globus_off_t                this_read = 0;
+
             buffer = globus_i_dsi_rest_buffer_get(
                     gridftp_op_arg, (size_t) optimal_blocksize);
             gridftp_op_arg->current_buffer = NULL;
@@ -320,18 +326,46 @@ globus_l_dsi_rest_write_register_reads(
 
             GlobusDsiRestTrace("Registering read with rest_buffer=%p\n",
                           (void *) buffer);
+
+            if (gridftp_op_arg->total != -1)
+            {
+                /* DSI requested partial transfer. This only works 
+                 * if the DSI forces ordering on the read callbacks
+                 */
+                globus_off_t remaining =
+                        gridftp_op_arg->total
+                        - gridftp_op_arg->offset
+                        - bytes_registered;
+
+                if (remaining == 0)
+                {
+                    break;
+                }
+                if (remaining < buffer->buffer_len)
+                {
+                    this_read = remaining;
+                }
+            }
+            else
+            {
+                this_read = buffer->buffer_len;
+            }
             result = globus_gridftp_server_register_read(
                     gridftp_op_arg->op,
                     buffer->buffer,
-                    buffer->buffer_len,
+                    this_read,
                     globus_l_dsi_rest_gridftp_read_callback,
                     gridftp_op_arg);
             if (result != GLOBUS_SUCCESS)
             {
                 goto register_fail;
             }
+
+            bytes_registered += this_read;
+
             buffer->next = gridftp_op_arg->registered_buffers;
             gridftp_op_arg->registered_buffers = buffer;
+
         }
     }
 

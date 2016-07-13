@@ -101,8 +101,8 @@ void *server_thread(void *arg)
 
     while (!end_server)
     {
-        globus_xio_handle_t             xio_handle;
-        globus_xio_data_descriptor_t    descriptor;
+        globus_xio_handle_t             xio_handle = NULL;
+        globus_xio_data_descriptor_t    descriptor = NULL;
         globus_result_t                 result;
         
         result = globus_xio_server_accept(&xio_handle, xio_server);
@@ -121,6 +121,7 @@ void *server_thread(void *arg)
             globus_hashtable_t          headers;
             globus_size_t               nbytes;
             unsigned char               upbuf[64];
+            bool                        eof = false;
             struct test_case            bad_test = 
             {
                 .response_code = 500
@@ -130,6 +131,9 @@ void *server_thread(void *arg)
             result = globus_xio_data_descriptor_init(&descriptor, xio_handle);
             if (result != GLOBUS_SUCCESS)
             {
+                fprintf(stderr, "Error initializing descriptor: %s\n",
+                        globus_error_print_friendly(
+                            globus_error_peek(result)));
                 goto end_this_socket;
             }
 
@@ -140,9 +144,26 @@ void *server_thread(void *arg)
                     0,
                     &nbytes,
                     descriptor);
+            if (result != GLOBUS_SUCCESS &&
+                (globus_error_match(
+                    globus_error_peek(result),
+                    GLOBUS_XIO_MODULE,
+                    GLOBUS_XIO_ERROR_EOF)
+                || globus_xio_driver_error_match(
+                        http_driver,
+                        globus_error_peek(result),
+                        GLOBUS_XIO_HTTP_ERROR_EOF)))
+            {
+                eof = true;
+                result = GLOBUS_SUCCESS;
+            }
+
 
             if (result != GLOBUS_SUCCESS)
             {
+                fprintf(stderr, "Reading  descriptor: %s\n",
+                        globus_error_print_friendly(
+                            globus_error_peek(result)));
                 goto end_this_socket;
             }
 
@@ -184,7 +205,7 @@ void *server_thread(void *arg)
                 {
                     test->server_read_offset = nbytes;
                 }
-                while (test->server_read_offset < body_len)
+                while ((!eof) && test->server_read_offset < body_len)
                 {
                     result = globus_xio_read(
                             xio_handle,
@@ -256,6 +277,7 @@ void *server_thread(void *arg)
             if (descriptor != NULL)
             {
                 globus_xio_data_descriptor_destroy(descriptor);
+                descriptor = NULL;
             }
             globus_xio_close(xio_handle, NULL);
             xio_handle = NULL;

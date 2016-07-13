@@ -542,7 +542,7 @@ globus_l_dsi_rest_recv(
     globus_dsi_rest_gridftp_op_arg_t    gridftp_op_arg = {.op=op};
     globus_l_dsi_rest_handle_t         *dsi_rest_handle = user_arg;
     char                               *uri;
-    globus_result_t                     result;
+    globus_result_t                     result = GLOBUS_SUCCESS;
 
     uri = globus_common_create_string(
             "http://%s/%s",
@@ -609,7 +609,7 @@ globus_l_dsi_rest_send(
     globus_dsi_rest_gridftp_op_arg_t    gridftp_op_arg = {.op=op };
     globus_l_dsi_rest_handle_t         *dsi_rest_handle = user_arg;
     char                               *uri;
-    globus_result_t                     result;
+    globus_result_t                     result = GLOBUS_SUCCESS;
 
     uri = globus_common_create_string(
             "http://%s/%s",
