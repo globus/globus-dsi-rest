@@ -149,6 +149,12 @@ globus_l_dsi_rest_gridftp_read_callback(
 
     GlobusDsiRestEnter();
 
+    if (gridftp_op_arg->end_offset != 0 &&
+        (offset + nbytes) == (gridftp_op_arg->end_offset))
+    {
+        signal = eof = true;
+    }
+
     GlobusDsiRestDebug("op=%p result=%#x buffer=%p nbytes=%zd offset=%"PRIuMAX" eof=%d user_arg=%p\n",
             (void *) op,
             result,
@@ -290,9 +296,6 @@ globus_l_dsi_rest_write_register_reads(
             currently_registered,
             bytes_registered);
 
-    /* TODO: check against total length of operation so that we can support
-     * partial or restarted transfers
-     */
     if (gridftp_op_arg->result == GLOBUS_SUCCESS && !gridftp_op_arg->eof)
     {
         /* Reads still might be useful */
@@ -309,7 +312,22 @@ globus_l_dsi_rest_write_register_reads(
         for (int i = currently_registered; i < optimal_concurrency; i++)
         {
             globus_off_t                this_read = 0;
+            globus_off_t                remaining = 0;
 
+            if (gridftp_op_arg->end_offset != 0)
+            {
+                /* DSI requested partial transfer. This only works 
+                 * if the DSI forces ordering on the read callbacks
+                 */
+                remaining = gridftp_op_arg->end_offset
+                        - gridftp_op_arg->offset
+                        - bytes_registered;
+
+                if (remaining == 0)
+                {
+                    break;
+                }
+            }
             buffer = globus_i_dsi_rest_buffer_get(
                     gridftp_op_arg, (size_t) optimal_blocksize);
             gridftp_op_arg->current_buffer = NULL;
@@ -324,32 +342,19 @@ globus_l_dsi_rest_write_register_reads(
 
             assert(buffer->buffer_used == 0);
 
-            GlobusDsiRestTrace("Registering read with rest_buffer=%p\n",
-                          (void *) buffer);
-
-            if (gridftp_op_arg->total != -1)
+            this_read = buffer->buffer_len;
+            if (gridftp_op_arg->end_offset != 0
+                && remaining < buffer->buffer_len)
             {
-                /* DSI requested partial transfer. This only works 
-                 * if the DSI forces ordering on the read callbacks
-                 */
-                globus_off_t remaining =
-                        gridftp_op_arg->total
-                        - gridftp_op_arg->offset
-                        - bytes_registered;
+                this_read = remaining;
+            }
 
-                if (remaining == 0)
-                {
-                    break;
-                }
-                if (remaining < buffer->buffer_len)
-                {
-                    this_read = remaining;
-                }
-            }
-            else
-            {
-                this_read = buffer->buffer_len;
-            }
+            GlobusDsiRestTrace("register_read: "
+                    "rest_buffer=%p "
+                    "this_read=%"GLOBUS_OFF_T_FORMAT"\n",
+                    (void *) buffer,
+                    this_read);
+
             result = globus_gridftp_server_register_read(
                     gridftp_op_arg->op,
                     buffer->buffer,
@@ -384,6 +389,7 @@ globus_l_dsi_rest_is_transfer_offset_ready(
     const globus_i_dsi_rest_buffer_t   *dsi_rest_buffer;
     bool                                b;
     
+    GlobusDsiRestEnter();
     dsi_rest_buffer = gridftp_op_arg->pending_buffers;
 
     b = (dsi_rest_buffer != NULL) &&

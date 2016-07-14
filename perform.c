@@ -72,7 +72,7 @@ globus_l_dsi_rest_perform_thread(
     complete_callback = request->complete_callback;
     complete_callback_arg = request->complete_callback_arg;
 
-    if (result == GLOBUS_SUCCESS)
+    if (request->result != GLOBUS_SUCCESS)
     {
         result = request->result;
     }

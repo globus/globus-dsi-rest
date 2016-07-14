@@ -75,7 +75,7 @@ struct globus_i_dsi_rest_gridftp_op_arg_s
     globus_result_t                     result;
 
     uint64_t                            offset;
-    uint64_t                            total;
+    uint64_t                            end_offset;
     bool                                eof;
 
     globus_i_dsi_rest_buffer_t         *pending_buffers;

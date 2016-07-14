@@ -147,8 +147,13 @@ globus_dsi_rest_request(
             .op = gridftp_op_arg->op,
             .pending_buffers_last = &request->read_gridftp_op_arg.pending_buffers,
             .offset = gridftp_op_arg->offset,
-            .total = gridftp_op_arg->length,
         };
+        if (gridftp_op_arg->length != (globus_off_t) -1)
+        {
+            request->read_gridftp_op_arg.end_offset =
+                    request->read_gridftp_op_arg.offset
+                    + gridftp_op_arg->length;
+        }
         rc = globus_mutex_init(&request->read_gridftp_op_arg.mutex, NULL);
         if (rc != GLOBUS_SUCCESS)
         {
@@ -565,8 +570,13 @@ globus_l_dsi_rest_prepare_write_gridftp_op_callback(
         .op = gridftp_op_arg->op,
         .pending_buffers_last = &current_part->gridftp_op_arg.pending_buffers,
         .offset = gridftp_op_arg->offset,
-        .total = gridftp_op_arg->length
     };
+    if (gridftp_op_arg->length != (globus_off_t) -1)
+    {
+        current_part->gridftp_op_arg.end_offset =
+                current_part->gridftp_op_arg.offset 
+                + gridftp_op_arg->length;
+    }
     rc = globus_mutex_init(&current_part->gridftp_op_arg.mutex, NULL);
     if (rc != GLOBUS_SUCCESS)
     {
