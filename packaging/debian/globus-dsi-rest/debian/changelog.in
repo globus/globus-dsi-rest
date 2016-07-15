@@ -1,3 +1,9 @@
+globus-dsi-rest (0.13-1+gt6.@distro@) @distro@; urgency=low
+
+  * Test case fixes
+
+ -- Globus Toolkit <support@globus.org>  Fri, 15 Jul 2016 14:05:44 -0400
+
 globus-dsi-rest (0.12-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix bugs in partial read gridftp_op

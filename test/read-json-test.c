@@ -77,6 +77,7 @@ void *server_thread(void *arg)
             globus_hashtable_t          headers;
             globus_size_t               nbytes;
             unsigned char               upbuf[256];
+            bool                        eof = false;
 
             result = globus_xio_data_descriptor_init(&descriptor, xio_handle);
             if (result != GLOBUS_SUCCESS)
@@ -92,9 +93,18 @@ void *server_thread(void *arg)
                     &nbytes,
                     descriptor);
 
-            if (result != GLOBUS_SUCCESS)
+            if (result != GLOBUS_SUCCESS &&
+                (globus_error_match(
+                    globus_error_peek(result),
+                    GLOBUS_XIO_MODULE,
+                    GLOBUS_XIO_ERROR_EOF)
+                || globus_xio_driver_error_match(
+                        http_driver,
+                        globus_error_peek(result),
+                        GLOBUS_XIO_HTTP_ERROR_EOF)))
             {
-                goto end_this_socket;
+                eof = true;
+                result = GLOBUS_SUCCESS;
             }
 
             result = globus_xio_data_descriptor_cntl(
@@ -119,46 +129,85 @@ void *server_thread(void *arg)
 
             size_t server_read_offset = nbytes;
 
-            do
+            while ((!eof) && result == GLOBUS_SUCCESS)
             {
+                if (server_read_offset >= sizeof(upbuf))
+                {
+                    result = GLOBUS_FAILURE;
+                    break;
+                }
+
                 result = globus_xio_read(
                         xio_handle,
                         upbuf+server_read_offset,
                         sizeof(upbuf)-server_read_offset,
-                        1,
+                        0,
                         &nbytes,
                         NULL);
+                if (result != GLOBUS_SUCCESS &&
+                    (globus_error_match(
+                        globus_error_peek(result),
+                        GLOBUS_XIO_MODULE,
+                        GLOBUS_XIO_ERROR_EOF)
+                    || globus_xio_driver_error_match(
+                            http_driver,
+                            globus_error_peek(result),
+                            GLOBUS_XIO_HTTP_ERROR_EOF)))
+                {
+                    eof = true;
+                    result = GLOBUS_SUCCESS;
+                }
                 if (result == GLOBUS_SUCCESS)
                 {
                     server_read_offset += nbytes;
                 }
             }
-            while (result == GLOBUS_SUCCESS);
+
+            if (result == GLOBUS_SUCCESS)
+            {
+                globus_xio_handle_cntl(
+                        xio_handle,
+                        http_driver,
+                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
+                        200);
+
+                globus_xio_handle_cntl(
+                        xio_handle,
+                        http_driver,
+                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HEADER,
+                        "Connection",
+                        "close");
+
+                result = globus_xio_write(xio_handle,
+                        (unsigned char *) upbuf,
+                        server_read_offset,
+                        server_read_offset,
+                        &nbytes, NULL);
+            }
+            else
+            {
+end_this_socket:
+                globus_xio_handle_cntl(
+                        xio_handle,
+                        http_driver,
+                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
+                        500);
+                globus_xio_handle_cntl(
+                        xio_handle,
+                        http_driver,
+                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HEADER,
+                        "Connection",
+                        "close");
+            }
 
 
-            globus_xio_handle_cntl(
-                    xio_handle,
-                    http_driver,
-                    GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
-                    "200");
-
-            result = globus_xio_write(xio_handle,
-                    (unsigned char *) upbuf,
-                    server_read_offset,
-                    server_read_offset,
-                    &nbytes, NULL);
-
-        end_this_socket:
             if (descriptor != NULL)
             {
                 globus_xio_data_descriptor_destroy(descriptor);
             }
-            //if (result != GLOBUS_SUCCESS)
-            {
-                globus_xio_close(xio_handle, NULL);
-                xio_handle = NULL;
-                continue;
-            }
+            globus_xio_close(xio_handle, NULL);
+            xio_handle = NULL;
+            continue;
         }
     }
     return 0;

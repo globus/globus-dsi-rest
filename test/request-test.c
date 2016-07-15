@@ -313,19 +313,23 @@ void *server_thread(void *arg)
 
             if (test->upload_body != NULL)
             {
-                size_t body_len = strlen(test->upload_body);
-
                 if (nbytes > 0)
                 {
                     test->server_read_offset = nbytes;
                 }
-                while ((!eof) && test->server_read_offset < body_len)
+                while (!eof)
                 {
+                    if (test->server_read_offset >= sizeof(upbuf))
+                    {
+                        result = GLOBUS_FAILURE;
+                        break;
+                    }
+
                     result = globus_xio_read(
                             xio_handle,
                             upbuf+test->server_read_offset,
                             sizeof(upbuf)-test->server_read_offset,
-                            1,
+                            0,
                             &nbytes,
                             NULL);
                     test->server_read_offset += nbytes;
@@ -341,34 +345,51 @@ void *server_thread(void *arg)
                                     GLOBUS_XIO_HTTP_ERROR_EOF))
                         {
                             result = GLOBUS_SUCCESS;
-                            break;
+                            eof = true;
                         }
                         else
                         {
                             char *errstr = globus_error_print_friendly(globus_error_peek(result));
                             fprintf(stderr, "READ ERROR: %s\n", errstr);
                             free(errstr);
-                            goto end_this_socket;
+                            break;
                         }
                     }
                 }
             }
 
-            globus_xio_handle_cntl(
-                    xio_handle,
-                    http_driver,
-                    GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
-                    test->response_code);
-
-            if (test->location)
+            if (result == GLOBUS_SUCCESS)
             {
                 globus_xio_handle_cntl(
                         xio_handle,
                         http_driver,
-                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HEADER,
-                        "Location",
-                        test->location);
+                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
+                        test->response_code);
+
+                if (test->location)
+                {
+                    globus_xio_handle_cntl(
+                            xio_handle,
+                            http_driver,
+                            GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HEADER,
+                            "Location",
+                            test->location);
+                }
             }
+            else
+            {
+                globus_xio_handle_cntl(
+                        xio_handle,
+                        http_driver,
+                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
+                        500);
+            }
+            globus_xio_handle_cntl(
+                    xio_handle,
+                    http_driver,
+                    GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HEADER,
+                    "Connection",
+                    "close");
 
             char *download_body = test->download_body;
 

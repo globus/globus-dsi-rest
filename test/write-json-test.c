@@ -157,6 +157,13 @@ void *server_thread(void *arg)
                     GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
                     "200");
 
+            globus_xio_handle_cntl(
+                    xio_handle,
+                    http_driver,
+                    GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HEADER,
+                    "Connection",
+                    "close");
+
             result = globus_xio_write(xio_handle,
                     (unsigned char *) upbuf,
                     server_read_offset,
