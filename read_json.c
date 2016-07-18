@@ -66,7 +66,7 @@ globus_l_dsi_rest_read_json(
         jdata->buffer_used += buffer_length;
         jdata->buffer[jdata->buffer_used] = 0;
     }
-    else
+    else if (jdata->buffer_used > 0) 
     {
         /* Final read, parse json */
         GlobusDsiRestDebug(jdata->buffer);
@@ -75,6 +75,10 @@ globus_l_dsi_rest_read_json(
         {
             result = GlobusDsiRestErrorJson(&error);
         }
+    }
+    else
+    {
+        *jdata->json_out = NULL;
     }
 
 done:

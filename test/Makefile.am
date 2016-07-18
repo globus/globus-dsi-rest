@@ -12,6 +12,7 @@ check_PROGRAMS = \
 	read-json-test \
 	request-test \
 	response-test \
+        retryable-test \
 	set-request-test \
 	write-block-test \
 	write-form-test \
@@ -20,7 +21,11 @@ check_PROGRAMS = \
 	uri-add-query-test \
 	uri-escape-test
 
-check_LTLIBRARIES = libglobus_gridftp_server_dsi_rest.la
+check_LTLIBRARIES = libglobus_gridftp_server_dsi_rest.la libtest_xio_server.la
+LDADD = libtest_xio_server.la
+
+libtest_xio_server_la_SOURCES = test-xio-server.c test-xio-server.h
+
 X509_CERT_DIR = $(abs_builddir)
 GRIDMAP = $(abs_builddir)/gridmap
 TESTS_ENVIRONMENT = \
@@ -75,6 +80,9 @@ request_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 response_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 response_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
+
+retryable_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
+retryable_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 write_block_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 write_block_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)

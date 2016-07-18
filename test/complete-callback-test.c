@@ -19,14 +19,14 @@
 #include <curl/curl.h>
 
 #include "globus_dsi_rest.h"
-#include "globus_xio.h"
-#include "globus_xio_http.h"
+#include "test-xio-server.h"
 
 struct test_case
 {
     char                               *method;
     char                               *uri_pattern;
     bool                                fail;
+    int                                 response_code;
     globus_mutex_t                      mutex;
     globus_cond_t                       cond;
     globus_result_t                     result;
@@ -39,23 +39,16 @@ struct test_case                        tests[] =
     {
         .method = "HEAD",
         .uri_pattern = "/good",
+        .response_code = 200,
         .fail = false
     },
     {
         .method = "HEAD",
         .uri_pattern = "/fail",
+        .response_code = 500,
         .fail = true,
     },
-    {
-        .method = "HEAD",
-        .uri_pattern = "/ENDSERVER",
-        .fail = false,
-    },
 };
-
-globus_mutex_t server_done_mutex;
-globus_cond_t server_done_cond;
-bool server_done;
 
 static
 globus_result_t
@@ -90,121 +83,29 @@ complete_callback(
 }
 /* complete_callback() */
 
-globus_xio_driver_t                     http_driver;
-
-static
-void *server_thread(void *arg)
+globus_result_t
+request_test_handler(
+    void                               *route_arg,
+    void                               *request_body,
+    size_t                              request_body_length,
+    int                                *response_code,
+    void                               *response_body,
+    size_t                             *response_body_length,
+    globus_dsi_rest_key_array_t        *headers)
 {
-    globus_xio_server_t                 xio_server = arg;
-    bool                                end_server = false;
+    struct test_case                   *test = route_arg;
+    globus_result_t                     result = GLOBUS_SUCCESS;
 
-    while (!end_server)
-    {
-        globus_xio_handle_t             xio_handle;
-        globus_xio_data_descriptor_t    descriptor;
-        globus_result_t                 result;
-        
-        result = globus_xio_server_accept(&xio_handle, xio_server);
+    *response_code = test->response_code;
+    *response_body_length = 0;
+    headers->count = 0;
 
-        if (result != GLOBUS_SUCCESS)
-        {
-            continue;
-        }
-        result = globus_xio_open(xio_handle, NULL, NULL);
-
-        while (xio_handle != NULL)
-        {
-            char                       *method;
-            char                       *uri;
-            globus_xio_http_version_t   http_version;
-            globus_hashtable_t          headers;
-            globus_size_t               nbytes;
-            unsigned char               upbuf[64];
-
-            result = globus_xio_data_descriptor_init(&descriptor, xio_handle);
-            if (result != GLOBUS_SUCCESS)
-            {
-                goto end_this_socket;
-            }
-
-            result = globus_xio_read(
-                    xio_handle,
-                    upbuf,
-                    sizeof(upbuf),
-                    0,
-                    &nbytes,
-                    descriptor);
-
-            if (result != GLOBUS_SUCCESS)
-            {
-                goto end_this_socket;
-            }
-
-            result = globus_xio_data_descriptor_cntl(
-                    descriptor,
-                    http_driver,
-                    GLOBUS_XIO_HTTP_GET_REQUEST,
-                    &method,
-                    &uri,
-                    &http_version,
-                    &headers);
-
-            if (result != GLOBUS_SUCCESS)
-            {
-                goto end_this_socket;
-            }
-            if (strcmp(uri, "/ENDSERVER") == 0)
-            {
-                end_server = true;
-                goto end_this_socket;
-            }
-            else if (strcmp(uri, "/good") == 0)
-            {
-                globus_xio_handle_cntl(
-                        xio_handle,
-                        http_driver,
-                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
-                        200);
-            }
-            else
-            {
-                globus_xio_handle_cntl(
-                        xio_handle,
-                        http_driver,
-                        GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_STATUS_CODE,
-                        500);
-            }
-
-
-            result = globus_xio_handle_cntl(xio_handle,
-                    http_driver,
-                    GLOBUS_XIO_HTTP_HANDLE_SET_END_OF_ENTITY);
-
-        end_this_socket:
-            if (descriptor != NULL)
-            {
-                globus_xio_data_descriptor_destroy(descriptor);
-            }
-            globus_xio_close(xio_handle, NULL);
-            xio_handle = NULL;
-        }
-    }
-    globus_xio_server_close(xio_server);
-
-    globus_mutex_lock(&server_done_mutex);
-    server_done = true;
-    globus_cond_signal(&server_done_cond);
-    globus_mutex_unlock(&server_done_mutex);
-
-    return 0;
+    return result;
 }
 
 int main()
 {
     globus_result_t                     result;
-    globus_xio_server_t                 xio_server;
-    globus_xio_driver_t                 tcp_driver;
-    globus_xio_stack_t                  xio_stack;
     char                               *contact_string;
     int                                 rc = 0;
 
@@ -216,44 +117,15 @@ int main()
     printf("1..%zu\n", sizeof(tests)/sizeof(tests[0]));
     globus_module_activate(GLOBUS_DSI_REST_MODULE);
 
-    result = globus_xio_driver_load("tcp", &tcp_driver);
-    if (result != GLOBUS_SUCCESS)
-    {
-        return 99;
-    }
-    result = globus_xio_driver_load("http", &http_driver);
-    if (result != GLOBUS_SUCCESS)
-    {
-        return 99;
-    }
-    result = globus_xio_stack_init(&xio_stack, NULL);
-    if (result != GLOBUS_SUCCESS)
-    {
-        return 99;
-    }
-    result = globus_xio_stack_push_driver(xio_stack, tcp_driver);
-    if (result != GLOBUS_SUCCESS)
-    {
-        return 99;
-    }
-    result = globus_xio_stack_push_driver(xio_stack, http_driver);
-    if (result != GLOBUS_SUCCESS)
-    {
-        return 99;
-    }
-    result = globus_xio_server_create(&xio_server, NULL, xio_stack);
-    if (result != GLOBUS_SUCCESS)
-    {
-        return 99;
-    }
-    result = globus_xio_server_get_contact_string(xio_server, &contact_string);
-    if (result != GLOBUS_SUCCESS)
-    {
-        return 99;
-    }
+    result = globus_dsi_rest_test_server_init(&contact_string);
 
-    globus_thread_t thread;
-    globus_thread_create(&thread, NULL, server_thread, xio_server);
+    for (size_t i = 0; i < sizeof(tests)/sizeof(tests[0]); i++)
+    {
+        result = globus_dsi_rest_test_server_add_route(
+            tests[i].uri_pattern,
+            request_test_handler,
+            &tests[i]);
+    }
 
     for (size_t i = 0; i < sizeof(tests)/sizeof(tests[0]); i++)
     {
@@ -308,12 +180,8 @@ int main()
             rc++;
         }
     }
-    globus_mutex_lock(&server_done_mutex);
-    while (!server_done)
-    {
-        globus_cond_wait(&server_done_cond, &server_done_mutex);
-    }
-    globus_mutex_unlock(&server_done_mutex);
+    globus_dsi_rest_test_server_destroy();
+
     free(contact_string);
     globus_module_deactivate_all();
     curl_global_cleanup();

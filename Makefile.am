@@ -23,6 +23,7 @@ AM_LDFLAGS = \
 	$(OPENSSL_LIBS)
 
 libglobus_dsi_rest_la_SOURCES = \
+	error_is_retryable.c \
 	globus_dsi_rest.h \
 	globus_i_dsi_rest.h \
 	version.h \

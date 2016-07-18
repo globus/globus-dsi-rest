@@ -54,7 +54,7 @@
 extern "C" {
 #endif
 
-#include <stdlib.h>
+#include <stdbool.h>
 #include "globus_common.h"
 #include "globus_gridftp_server.h"
 
@@ -407,6 +407,10 @@ globus_result_t
 globus_dsi_rest_uri_escape(
     const char                         *s,
     char                              **escaped);
+
+bool
+globus_dsi_rest_error_is_retryable(
+    globus_result_t                     result);
 
 /**
  * @defgroup globus_dsi_rest_callback_specializations Callback Specializations
