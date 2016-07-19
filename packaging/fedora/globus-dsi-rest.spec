@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.14
+Version:	0.15
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Tue Jul 19 2016 Globus Toolkit <support@globus.org> - 0.15-1
+- Track amounts read/written in response callback
+
 * Mon Jul 18 2016 Globus Toolkit <support@globus.org> - 0.14-1
 - Add globus_dsi_rest_error_is_retryable()
 

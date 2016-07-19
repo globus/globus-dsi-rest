@@ -1,3 +1,9 @@
+globus-dsi-rest (0.15-1+gt6.@distro@) @distro@; urgency=low
+
+  * Track amounts read/written in response callback
+
+ -- Globus Toolkit <support@globus.org>  Tue, 19 Jul 2016 17:40:39 -0400
+
 globus-dsi-rest (0.14-1+gt6.@distro@) @distro@; urgency=low
 
   * Add globus_dsi_rest_error_is_retryable()

@@ -645,8 +645,21 @@ struct globus_dsi_rest_response_arg_s
     /** Value of the HTTP response code */
     int                                 response_code;
     /** Array of header names is updated by globus_dsi_rest_response with
-     * their values if present, or NULL if not */
+     * their values if present, or NULL if not
+     */
     globus_dsi_rest_key_array_t         desired_headers;
+    /**
+     * The number of bytes of the request body which were sent to the server.
+     * This may not be the amount the server received if some network error
+     * occurred.
+     */
+    off_t                               request_bytes_uploaded;
+    /**
+     * The number of bytes of the request body which were received from
+     * the server. * This may not be the amount the server sent if some network
+     * error occurred.
+     */
+    off_t                               response_bytes_downloaded;
 }
 globus_dsi_rest_response_arg_t;
 

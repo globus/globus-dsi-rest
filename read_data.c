@@ -42,6 +42,9 @@ globus_i_dsi_rest_read_data(
                 buffer,
                 size * nitems,
                 &processed);
+
+        request->response_bytes_downloaded += processed;
+
         if (result == GLOBUS_SUCCESS
             && GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE))
         {

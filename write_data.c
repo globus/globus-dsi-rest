@@ -53,6 +53,7 @@ globus_i_dsi_rest_write_data(
         GlobusDebugPrintf(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE, ("%s\n", q));
         free(q);
     }
+    request->response_bytes_downloaded += (size * nmemb);
 
     if (request->data_read_callback != NULL)
     {

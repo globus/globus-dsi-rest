@@ -131,6 +131,9 @@ struct globus_i_dsi_rest_request_s
     globus_dsi_rest_key_array_t         response_headers;
     char                               *complete_uri;
 
+    off_t                               request_bytes_uploaded;
+    off_t                               response_bytes_downloaded;
+
     globus_thread_t                     thread;
 
     globus_i_dsi_rest_part_t            write_part;

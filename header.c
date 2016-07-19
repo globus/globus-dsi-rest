@@ -144,6 +144,17 @@ globus_i_dsi_rest_header(
         }
         else
         {
+            globus_dsi_rest_response_arg_t
+                                       *response
+                                      = request->response_callback_arg;
+
+            if (request->response_callback == globus_dsi_rest_response)
+            {
+                response->request_bytes_uploaded =
+                        request->request_bytes_uploaded;
+                response->response_bytes_downloaded =
+                        request->response_bytes_downloaded;
+            }
             result = request->response_callback(
                 request->response_callback_arg,
                 request->response_code,
