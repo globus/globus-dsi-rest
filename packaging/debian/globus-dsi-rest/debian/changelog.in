@@ -1,4 +1,4 @@
-globus-dsi-rest (0.13-1+gt6.@distro@) @distro@; urgency=low
+globus-dsi-rest (0.14-1+gt6.@distro@) @distro@; urgency=low
 
   * Add globus_dsi_rest_error_is_retryable()
 
