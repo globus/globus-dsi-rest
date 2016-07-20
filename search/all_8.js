@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['offset',['offset',['../structglobus__dsi__rest__gridftp__op__arg__s.html#a24ddbbc76fe8fef7a40c21557eeacd3d',1,'globus_dsi_rest_gridftp_op_arg_s']]],
-  ['op',['op',['../structglobus__dsi__rest__gridftp__op__arg__s.html#aa06b730becb826a7fc8704f2152eb2bf',1,'globus_dsi_rest_gridftp_op_arg_s']]]
+  ['num_5fparts',['num_parts',['../structglobus__dsi__rest__multipart__arg__s.html#a4e59e8932992ef7f1a0f55094049602d',1,'globus_dsi_rest_multipart_arg_s']]]
 ];

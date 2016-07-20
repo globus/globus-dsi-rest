@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">globus_dsi_rest
-   &#160;<span id="projectnumber">0.9</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -102,6 +102,10 @@ Data Fields</h2></td></tr>
 <tr class="separator:adb426ef2fc25ab9a33207ec786804823"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a518d813320550f03f89e293056bff32f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__globus__dsi__rest__data.html#ga33ced6c9e430229bd03adf9622be398c">globus_dsi_rest_key_array_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__response__arg__s.html#a518d813320550f03f89e293056bff32f">desired_headers</a></td></tr>
 <tr class="separator:a518d813320550f03f89e293056bff32f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abffc96c5dc16153fcd933e6de2256f3c"><td class="memItemLeft" align="right" valign="top">off_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__response__arg__s.html#abffc96c5dc16153fcd933e6de2256f3c">request_bytes_uploaded</a></td></tr>
+<tr class="separator:abffc96c5dc16153fcd933e6de2256f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0bf5c48359f006b017b3c0edab21944"><td class="memItemLeft" align="right" valign="top">off_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structglobus__dsi__rest__response__arg__s.html#ae0bf5c48359f006b017b3c0edab21944">response_bytes_downloaded</a></td></tr>
+<tr class="separator:ae0bf5c48359f006b017b3c0edab21944"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Response specialization response_callback_arg. </p>
@@ -117,6 +121,32 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Array of header names is updated by globus_dsi_rest_response with their values if present, or NULL if not </p>
+
+</div>
+</div>
+<a class="anchor" id="abffc96c5dc16153fcd933e6de2256f3c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">off_t globus_dsi_rest_response_arg_s::request_bytes_uploaded</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The number of bytes of the request body which were sent to the server. This may not be the amount the server received if some network error occurred. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae0bf5c48359f006b017b3c0edab21944"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">off_t globus_dsi_rest_response_arg_s::response_bytes_downloaded</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The number of bytes of the request body which were received from the server. * This may not be the amount the server sent if some network error occurred. </p>
 
 </div>
 </div>
