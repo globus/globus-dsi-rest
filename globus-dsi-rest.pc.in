@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: globus-dsi-rest
 Description: Globus Toolkit - Globus DSI Rest Helper API
 Version: @VERSION@
-Requires.private: globus-gridftp-server, globus-xio, globus-common, openssl, jansson
+Requires.private: globus-gridftp-server, globus-common, openssl, jansson
 Libs: -L${libdir} -lglobus_dsi_rest
 Libs.private: @LIBCURL@
 Cflags: -I${includedir}
