@@ -149,11 +149,9 @@ globus_l_dsi_rest_gridftp_read_callback(
 
     GlobusDsiRestEnter();
 
-    if (gridftp_op_arg->end_offset != 0 &&
-        (offset + nbytes) == (gridftp_op_arg->end_offset))
-    {
-        signal = eof = true;
-    }
+    *gridftp_op_arg->eofp |= eof;
+
+    GlobusDsiRestLogResult(GLOBUS_DSI_REST_TRACE, result);
 
     GlobusDsiRestDebug("op=%p result=%#x buffer=%p nbytes=%zd offset=%"PRIuMAX" eof=%d user_arg=%p\n",
             (void *) op,
@@ -163,6 +161,13 @@ globus_l_dsi_rest_gridftp_read_callback(
             (uintmax_t) offset,
             (int) eof,
             user_arg);
+
+    if (gridftp_op_arg->end_offset != 0 &&
+        (offset + nbytes) == (gridftp_op_arg->end_offset))
+    {
+        signal = eof = true;
+    }
+
 
     globus_mutex_lock(&gridftp_op_arg->mutex);
 
@@ -292,9 +297,10 @@ globus_l_dsi_rest_write_register_reads(
         buffer = buffer->next;
     }
     GlobusDsiRestTrace(
-            "Currently %d blocks registered for %"GLOBUS_OFF_T_FORMAT" bytes\n",
+            "currently_registered=%d bytes_registered= %"GLOBUS_OFF_T_FORMAT" end_offset=%"GLOBUS_OFF_T_FORMAT"\n",
             currently_registered,
-            bytes_registered);
+            bytes_registered,
+            gridftp_op_arg->end_offset);
 
     if (gridftp_op_arg->result == GLOBUS_SUCCESS && !gridftp_op_arg->eof)
     {
@@ -312,9 +318,9 @@ globus_l_dsi_rest_write_register_reads(
         for (int i = currently_registered; i < optimal_concurrency; i++)
         {
             globus_off_t                this_read = 0;
-            globus_off_t                remaining = 0;
+            globus_off_t                remaining = optimal_blocksize;
 
-            if (gridftp_op_arg->end_offset != 0)
+            if (gridftp_op_arg->end_offset != (globus_off_t)-1)
             {
                 /* DSI requested partial transfer. This only works 
                  * if the DSI forces ordering on the read callbacks
@@ -343,8 +349,7 @@ globus_l_dsi_rest_write_register_reads(
             assert(buffer->buffer_used == 0);
 
             this_read = buffer->buffer_len;
-            if (gridftp_op_arg->end_offset != 0
-                && remaining < buffer->buffer_len)
+            if (remaining < buffer->buffer_len)
             {
                 this_read = remaining;
             }

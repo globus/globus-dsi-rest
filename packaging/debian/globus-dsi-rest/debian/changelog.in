@@ -1,3 +1,10 @@
+globus-dsi-rest (0.16-1+gt6.@distro@) @distro@; urgency=low
+
+  * Add eof flag to gridftp_op_arg to pass back EOF state to requester
+  * Handle read until EOF in gridftp_op handling
+
+ -- Globus Toolkit <support@globus.org>  Tue, 26 Jul 2016 14:46:05 -0400
+
 globus-dsi-rest (0.15-1+gt6.@distro@) @distro@; urgency=low
 
   * Track amounts read/written in response callback

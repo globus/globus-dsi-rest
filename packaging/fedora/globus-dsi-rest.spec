@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.15
+Version:	0.16
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Tue Jul 26 2016 Globus Toolkit <support@globus.org> - 0.16-1
+- Add eof flag to gridftp_op_arg to pass back EOF state to requester
+- Handle read until EOF in gridftp_op handling
+
 * Tue Jul 19 2016 Globus Toolkit <support@globus.org> - 0.15-1
 - Track amounts read/written in response callback
 

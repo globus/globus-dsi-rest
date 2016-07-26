@@ -76,7 +76,11 @@ struct globus_i_dsi_rest_gridftp_op_arg_s
 
     uint64_t                            offset;
     uint64_t                            end_offset;
+    // If we hit EOF or end of expected read
     bool                                eof;
+    // Points to app's gridftp_op_arg's eof field, only set to true
+    // if we get an eof response from the GridFTP server.
+    bool                               *eofp;
 
     globus_i_dsi_rest_buffer_t         *pending_buffers;
     globus_i_dsi_rest_buffer_t        **pending_buffers_last;
@@ -442,6 +446,20 @@ extern const char * globus_i_dsi_rest_debug_level_names[];
 #define GlobusDsiRestExitInt(rc)  GlobusDsiRestTrace("exit: %d\n", rc)
 #define GlobusDsiRestExitBool(rc)  GlobusDsiRestTrace("exit: %s\n", rc?"true":"false")
 #define GlobusDsiRestExitPointer(p)  GlobusDsiRestTrace("exit: %p\n", (void *)p)
+
+#define GlobusDsiRestLogResult(level, result) \
+    do { \
+        int __level = level; \
+        if (GlobusDebugTrue(GLOBUS_DSI_REST, (__level))) \
+        { \
+            globus_object_t * obj = globus_error_peek(result); \
+            char *errstr = obj?globus_error_print_friendly(obj):strdup("Success"); \
+            GlobusDsiRestLog(__level, "result=%#x message=%s\n", \
+                    (unsigned int) result, \
+                    errstr?errstr:"UNKNOWN ERROR"); \
+            free(errstr); \
+        } \
+    } while (0)
 
 extern globus_mutex_t                   globus_i_dsi_rest_handle_cache_mutex;
 extern size_t                           globus_i_dsi_rest_handle_cache_index;

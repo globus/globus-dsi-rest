@@ -497,6 +497,11 @@ struct globus_dsi_rest_gridftp_op_arg_s
      * the DSI must force ordered data on the gridftp op.
      */
     globus_off_t                        length;
+    /**
+     * This is set to true upon completion of the gridftp operation
+     * if a registered read received a callback with eof=true
+     */
+    bool                                eof;
 }
 globus_dsi_rest_gridftp_op_arg_t;
 
