@@ -51,6 +51,8 @@ globus_i_dsi_rest_read_data(
             char                           *p = buffer;
             char                           *q = malloc(processed+1);
     
+            flockfile(GlobusDebugMyFile(GLOBUS_DSI_REST));
+            GlobusDsiRestTrace("data: ");
             q[processed] = '\0';
     
             for (size_t i = 0; i < processed; i++)
@@ -58,6 +60,7 @@ globus_i_dsi_rest_read_data(
                 q[i] = isprint(p[i]) ? p[i] : '.';
             }
             GlobusDebugPrintf(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE, ("%s\n", q));
+            funlockfile(GlobusDebugMyFile(GLOBUS_DSI_REST));
             free(q);
         }
     }
