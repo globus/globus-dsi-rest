@@ -1,4 +1,4 @@
-globus-dsi-rest (0.16-1+gt6.@distro@) @distro@; urgency=low
+globus-dsi-rest (0.17-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix some logging issues
 
