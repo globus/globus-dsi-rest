@@ -46,22 +46,28 @@ globus_i_dsi_rest_read_data(
         request->response_bytes_downloaded += processed;
 
         if (result == GLOBUS_SUCCESS
-            && GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE))
+            && GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_DATA))
         {
             char                           *p = buffer;
-            char                           *q = malloc(processed+1);
-    
-            flockfile(GlobusDebugMyFile(GLOBUS_DSI_REST));
-            GlobusDsiRestTrace("data: ");
-            q[processed] = '\0';
-    
+            FILE                           *fp = NULL;
+
+            fp = GlobusDebugMyFile(GLOBUS_DSI_REST);
+            flockfile(fp);
+
+            GlobusDsiRestData("buffer=%p buffer_size=%zu\n",
+                    (void *) buffer,
+                    size*nitems);
+
+            GlobusDsiRestData("data: ");
+
             for (size_t i = 0; i < processed; i++)
             {
-                q[i] = isprint(p[i]) ? p[i] : '.';
+                fputc(isprint(p[i]) ? p[i] : '.', fp);
             }
-            GlobusDebugPrintf(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE, ("%s\n", q));
-            funlockfile(GlobusDebugMyFile(GLOBUS_DSI_REST));
-            free(q);
+
+            fputc('\n', fp);
+            funlockfile(fp);
+            fp = NULL;
         }
     }
     else

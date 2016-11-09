@@ -35,23 +35,28 @@ globus_i_dsi_rest_write_data(
 
     GlobusDsiRestEnter();
 
-    GlobusDsiRestTrace("buffer=%p buffer_size=%d\n",
+
+    if (GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_DATA))
+    {
+        const char                     *p = ptr;
+        FILE                           *fp = NULL;
+
+        fp = GlobusDebugMyFile(GLOBUS_DSI_REST);
+        flockfile(fp);
+
+        GlobusDsiRestData("buffer=%p buffer_size=%zu\n",
             (void *) ptr,
             size*nmemb);
 
-    if (GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE))
-    {
-        char                           *p = ptr;
-        char                           *q = malloc(data_processed+1);
-
-        q[data_processed] = '\0';
+        GlobusDsiRestData("data: ");
 
         for (size_t i = 0; i < data_processed; i++)
         {
-            q[i] = isprint(p[i]) ? p[i] : '.';
+            fputc(isprint(p[i]) ? p[i] : '.', fp);
         }
-        GlobusDebugPrintf(GLOBUS_DSI_REST, GLOBUS_DSI_REST_TRACE, ("%s\n", q));
-        free(q);
+        fputc('\n', fp);
+        funlockfile(fp);
+        fp = NULL;
     }
     request->response_bytes_downloaded += (size * nmemb);
 

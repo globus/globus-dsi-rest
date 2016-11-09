@@ -396,12 +396,12 @@ GlobusDebugDeclare(GLOBUS_DSI_REST);
 
 enum
 {
-    GLOBUS_DSI_REST_TRACE             = 1<<0,
-    GLOBUS_DSI_REST_INFO              = 1<<1,
-    GLOBUS_DSI_REST_DEBUG             = 1<<2,
-    GLOBUS_DSI_REST_WARN              = 1<<3,
-    GLOBUS_DSI_REST_ERROR             = 1<<4,
-    GLOBUS_DSI_REST_ALL               = 1<<6
+    GLOBUS_DSI_REST_DATA              = 1<<0,
+    GLOBUS_DSI_REST_TRACE             = 1<<1,
+    GLOBUS_DSI_REST_INFO              = 1<<2,
+    GLOBUS_DSI_REST_DEBUG             = 1<<3,
+    GLOBUS_DSI_REST_WARN              = 1<<4,
+    GLOBUS_DSI_REST_ERROR             = 1<<5,
 };
 
 extern const char * globus_i_dsi_rest_debug_level_names[];
@@ -416,14 +416,16 @@ extern const char * globus_i_dsi_rest_debug_level_names[];
         { \
             flockfile(GlobusDebugMyFile(GLOBUS_DSI_REST)); \
             GlobusDebugPrintf(GLOBUS_DSI_REST, level__, \
-            ("dsi_rest: %5s: %s: ", \
-             globus_i_dsi_rest_debug_level_names[level__], __func__)); \
+            ("dsi_rest: %5s: %"PRIiMAX": %s: ", \
+             globus_i_dsi_rest_debug_level_names[level__],  \
+             (intmax_t) getpid(), __func__)); \
             GlobusDebugMyPrintf(GLOBUS_DSI_REST, \
                 (__VA_ARGS__)); \
             funlockfile(GlobusDebugMyFile(GLOBUS_DSI_REST)); \
         } \
     } while (0)
 
+#define GlobusDsiRestData(...) GlobusDsiRestLog(GLOBUS_DSI_REST_DATA, __VA_ARGS__)
 #define GlobusDsiRestTrace(...) GlobusDsiRestLog(GLOBUS_DSI_REST_TRACE, __VA_ARGS__)
 #define GlobusDsiRestInfo(...) GlobusDsiRestLog(GLOBUS_DSI_REST_INFO, __VA_ARGS__)
 #define GlobusDsiRestDebug(...) GlobusDsiRestLog(GLOBUS_DSI_REST_DEBUG, __VA_ARGS__)

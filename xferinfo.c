@@ -34,7 +34,17 @@ globus_i_dsi_rest_xferinfo(
     globus_result_t                     result;
     int                                 rc = 0;
 
-    GlobusDsiRestEnter();
+    if (GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_DATA))
+    {
+        GlobusDsiRestTrace(
+                "dltotal=%"PRIu64" dlnow=%"PRIu64" ultotal=%"PRIu64
+                " ulnow=%"PRIu64"\n",
+                (uint64_t) dltotal,
+                (uint64_t) dlnow,
+                (uint64_t) ultotal,
+                (uint64_t) ulnow);
+    }
+
     if (request->progress_callback != NULL)
     {
         result = request->progress_callback(
@@ -54,7 +64,10 @@ globus_i_dsi_rest_xferinfo(
         }
     }
 
-    GlobusDsiRestExitInt(rc);
+    if (GlobusDebugTrue(GLOBUS_DSI_REST, GLOBUS_DSI_REST_DATA))
+    {
+        GlobusDsiRestExitInt(rc);
+    }
     return rc;
 }
 /* globus_i_dsi_rest_xferinfo() */

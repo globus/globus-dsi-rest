@@ -116,6 +116,8 @@ perform_fail:
     {
         request->result = result;
     }
+    result = request->result;
+
     GlobusDsiRestExitResult(result);
     return result;
 }

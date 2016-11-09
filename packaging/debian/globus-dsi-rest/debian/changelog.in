@@ -1,3 +1,9 @@
+globus-dsi-rest (0.18-1+gt6.@distro@) @distro@; urgency=low
+
+  * Improve diagnostics
+
+ -- Globus Toolkit <support@globus.org>  Thu, 03 Nov 2016 09:03:47 -0400
+
 globus-dsi-rest (0.17-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix some logging issues
