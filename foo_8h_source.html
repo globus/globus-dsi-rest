@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.7"/>
-<title>globus_dsi_rest: Main Page</title>
+<title>globus_dsi_rest: /Users/bester/development/globus-dsi-rest/source/foo.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -37,11 +37,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
-      <li><a href="files.html"><span>Files</span></a></li>
+      <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -60,7 +60,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-</div><!-- top -->
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>Globals</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -75,26 +80,32 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li>  </ul>
+</div>
+</div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title">globus_dsi_rest Documentation</div>  </div>
+<div class="title">foo.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This header describes the public interface to the GridFTP DSI REST Helper API.</p>
-<p>It was designed with the following considerations in mind:</p>
-<ul>
-<li>GET, PUT, POST, DELETE, PATCH are all used by Google drive API</li>
-<li>Some (not all) of the operations will send binary data</li>
-<li>Some (not all) of the operations will send json data</li>
-<li>Some (not all) of the operations receive binary data</li>
-<li>Some (not all) of the operations receive json data</li>
-<li>Some (not all) of the operations include query parameters that need URL form encoding</li>
-<li>Some operations send or receive multipart mime data</li>
-<li>Access tokens might expire, need to be able to express the need to refresh and get a new one</li>
-<li>Arbitrary headers needed for partial downloads, resumable uploads, azure storage</li>
-</ul>
-<p>The interface for this library is described in the <a class="el" href="globus__dsi__rest_8h.html">globus_dsi_rest.h</a> header. </p>
-</div></div><!-- contents -->
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#define globus_i_ftp_control_debug(Level)                   \</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">    (globus_i_ftp_control_debug_level &gt;= (Level))</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#define globus_i_ftp_control_debug_extract_message(stream, ...) __VA_ARGS__</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#define globus_i_ftp_control_debug_printf(level, message)   \</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">do {                                                        \</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">    if (globus_i_ftp_control_debug(level))                  \</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">    {                                                       \</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">        globus_libc_fprintf(debug_handle, globus_i_ftp_control_debug_extract_message message)</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;    }                                                       \</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;} <span class="keywordflow">while</span> (0)</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;globus_i_ftp_control_debug_printf(42, (stderr, <span class="stringliteral">&quot;hello: %s\n&quot;</span>, world));</div>
+</div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated on Thu Nov 10 2016 17:23:03 for globus_dsi_rest by &#160;<a href="http://www.doxygen.org/index.html">

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['num_5fparts',['num_parts',['../structglobus__dsi__rest__multipart__arg__s.html#a4e59e8932992ef7f1a0f55094049602d',1,'globus_dsi_rest_multipart_arg_s']]]
+  ['length',['length',['../structglobus__dsi__rest__gridftp__op__arg__s.html#a03dce68cc155e6ed093976f1b4231020',1,'globus_dsi_rest_gridftp_op_arg_s']]]
 ];
