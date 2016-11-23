@@ -72,12 +72,6 @@ globus_l_dsi_rest_activate(void)
     {
         goto fail;
     }
-    globus_i_dsi_rest_share = curl_share_init();
-    if (globus_i_dsi_rest_share == NULL)
-    {
-        rc = GLOBUS_FAILURE;
-        goto share_init_fail;
-    }
     rc = globus_module_activate(GLOBUS_COMMON_MODULE);
     if (rc != GLOBUS_SUCCESS)
     {
@@ -108,11 +102,17 @@ globus_l_dsi_rest_activate(void)
     {
         goto share_ssl_lock_init_fail;
     }
+    globus_i_dsi_rest_share = curl_share_init();
+    if (globus_i_dsi_rest_share == NULL)
+    {
+        rc = GLOBUS_FAILURE;
+        goto share_init_fail;
+    }
     rc = curl_share_setopt(
             globus_i_dsi_rest_share,
             CURLSHOPT_LOCKFUNC,
             globus_l_dsi_rest_share_lock);
-    if (rc != GLOBUS_SUCCESS)
+    if (rc != CURLE_OK && rc != CURLSHE_BAD_OPTION)
     {
         goto share_setopt_fail;
     }
@@ -120,7 +120,7 @@ globus_l_dsi_rest_activate(void)
             globus_i_dsi_rest_share,
             CURLSHOPT_UNLOCKFUNC,
             globus_l_dsi_rest_share_unlock);
-    if (rc != GLOBUS_SUCCESS)
+    if (rc != CURLE_OK && rc != CURLSHE_BAD_OPTION)
     {
         goto share_setopt_fail;
     }
@@ -128,7 +128,7 @@ globus_l_dsi_rest_activate(void)
             globus_i_dsi_rest_share,
             CURLSHOPT_USERDATA,
             &globus_l_dsi_rest_write_lock_owners);
-    if (rc != GLOBUS_SUCCESS)
+    if (rc != CURLE_OK && rc != CURLSHE_BAD_OPTION)
     {
         goto share_setopt_fail;
     }
@@ -136,7 +136,7 @@ globus_l_dsi_rest_activate(void)
             globus_i_dsi_rest_share,
             CURLSHOPT_SHARE,
             CURL_LOCK_DATA_COOKIE);
-    if (rc != GLOBUS_SUCCESS)
+    if (rc != CURLE_OK && rc != CURLSHE_BAD_OPTION)
     {
         goto share_setopt_fail;
     }
@@ -144,7 +144,7 @@ globus_l_dsi_rest_activate(void)
             globus_i_dsi_rest_share,
             CURLSHOPT_SHARE,
             CURL_LOCK_DATA_DNS);
-    if (rc != GLOBUS_SUCCESS)
+    if (rc != CURLE_OK && rc != CURLSHE_BAD_OPTION)
     {
         goto share_setopt_fail;
     }
@@ -152,10 +152,11 @@ globus_l_dsi_rest_activate(void)
             globus_i_dsi_rest_share,
             CURLSHOPT_SHARE,
             CURL_LOCK_DATA_SSL_SESSION);
-    if (rc != GLOBUS_SUCCESS)
+    if (rc != CURLE_OK && rc != CURLSHE_BAD_OPTION)
     {
         goto share_setopt_fail;
     }
+    rc = GLOBUS_SUCCESS;
     globus_i_dsi_rest_handle_cache_index = 0;
 
     GlobusDebugInit(GLOBUS_DSI_REST, TRACE INFO DEBUG WARN ERROR);
@@ -163,6 +164,8 @@ globus_l_dsi_rest_activate(void)
     if (rc != 0)
     {
 share_setopt_fail:
+        curl_share_cleanup(globus_i_dsi_rest_share);
+share_init_fail:
         globus_rw_mutex_destroy(&globus_l_dsi_rest_share_ssl_lock);
 share_ssl_lock_init_fail:
         globus_rw_mutex_destroy(&globus_l_dsi_rest_share_dns_lock);
@@ -173,8 +176,6 @@ share_cookie_lock_init_fail:
 share_share_lock_init_fail:
         globus_mutex_destroy(&globus_i_dsi_rest_handle_cache_mutex);
 mutex_init_fail:
-        curl_share_cleanup(globus_i_dsi_rest_share);
-share_init_fail:
         globus_module_deactivate(GLOBUS_COMMON_MODULE);
     }
 activate_fail:

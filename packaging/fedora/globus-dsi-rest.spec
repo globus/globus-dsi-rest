@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.19
+Version:	0.20
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,7 +127,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
-* Wed Nov 23 2016 Globus Toolkit <support@globus.org> - 0.19-1
+* Wed Nov 23 2016 Globus Toolkit <support@globus.org> - 0.20-1
 - Add curl cookie/ssl/dns resource sharing between handles
 
 * Thu Nov 03 2016 Globus Toolkit <support@globus.org> - 0.18-1
