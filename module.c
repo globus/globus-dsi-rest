@@ -29,6 +29,36 @@ const char *                            globus_i_dsi_rest_debug_level_names[] =
 globus_mutex_t                          globus_i_dsi_rest_handle_cache_mutex;
 size_t                                  globus_i_dsi_rest_handle_cache_index;
 CURL                                   *globus_i_dsi_rest_handle_cache[GLOBUS_I_DSI_REST_HANDLE_CACHE_SIZE];
+CURLSH                                 *globus_i_dsi_rest_share;
+static globus_rw_mutex_t                globus_l_dsi_rest_share_share_lock;
+static globus_rw_mutex_t                globus_l_dsi_rest_share_cookie_lock;
+static globus_rw_mutex_t                globus_l_dsi_rest_share_dns_lock;
+static globus_rw_mutex_t                globus_l_dsi_rest_share_ssl_lock;
+
+static
+struct globus_l_dsi_rest_write_lock_owners_s
+{
+    globus_thread_t                     share_lock_owner;
+    globus_thread_t                     cookie_lock_owner;
+    globus_thread_t                     dns_lock_owner;
+    globus_thread_t                     ssl_lock_owner;
+}
+globus_l_dsi_rest_write_lock_owners;
+
+static
+void
+globus_l_dsi_rest_share_lock(
+    CURL                               *handle,
+    curl_lock_data                      data,
+    curl_lock_access                    access,
+    void *                              userptr);
+
+static
+void
+globus_l_dsi_rest_share_unlock(
+    CURL                               *handle,
+    curl_lock_data                      data,
+    void *                              userptr);
 
 GlobusDebugDefine(GLOBUS_DSI_REST);
 
@@ -42,6 +72,12 @@ globus_l_dsi_rest_activate(void)
     {
         goto fail;
     }
+    globus_i_dsi_rest_share = curl_share_init();
+    if (globus_i_dsi_rest_share == NULL)
+    {
+        rc = GLOBUS_FAILURE;
+        goto share_init_fail;
+    }
     rc = globus_module_activate(GLOBUS_COMMON_MODULE);
     if (rc != GLOBUS_SUCCESS)
     {
@@ -52,13 +88,93 @@ globus_l_dsi_rest_activate(void)
     {
         goto mutex_init_fail;
     }
+    rc = globus_rw_mutex_init(&globus_l_dsi_rest_share_share_lock, NULL);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_share_lock_init_fail;
+    }
+    rc = globus_rw_mutex_init(&globus_l_dsi_rest_share_cookie_lock, NULL);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_cookie_lock_init_fail;
+    }
+    rc = globus_rw_mutex_init(&globus_l_dsi_rest_share_dns_lock, NULL);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_dns_lock_init_fail;
+    }
+    rc = globus_rw_mutex_init(&globus_l_dsi_rest_share_ssl_lock, NULL);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_ssl_lock_init_fail;
+    }
+    rc = curl_share_setopt(
+            globus_i_dsi_rest_share,
+            CURLSHOPT_LOCKFUNC,
+            globus_l_dsi_rest_share_lock);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_setopt_fail;
+    }
+    rc = curl_share_setopt(
+            globus_i_dsi_rest_share,
+            CURLSHOPT_UNLOCKFUNC,
+            globus_l_dsi_rest_share_unlock);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_setopt_fail;
+    }
+    rc = curl_share_setopt(
+            globus_i_dsi_rest_share,
+            CURLSHOPT_USERDATA,
+            &globus_l_dsi_rest_write_lock_owners);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_setopt_fail;
+    }
+    rc = curl_share_setopt(
+            globus_i_dsi_rest_share,
+            CURLSHOPT_SHARE,
+            CURL_LOCK_DATA_COOKIE);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_setopt_fail;
+    }
+    rc = curl_share_setopt(
+            globus_i_dsi_rest_share,
+            CURLSHOPT_SHARE,
+            CURL_LOCK_DATA_DNS);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_setopt_fail;
+    }
+    rc = curl_share_setopt(
+            globus_i_dsi_rest_share,
+            CURLSHOPT_SHARE,
+            CURL_LOCK_DATA_SSL_SESSION);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        goto share_setopt_fail;
+    }
     globus_i_dsi_rest_handle_cache_index = 0;
 
     GlobusDebugInit(GLOBUS_DSI_REST, TRACE INFO DEBUG WARN ERROR);
 
-mutex_init_fail:
     if (rc != 0)
     {
+share_setopt_fail:
+        globus_rw_mutex_destroy(&globus_l_dsi_rest_share_ssl_lock);
+share_ssl_lock_init_fail:
+        globus_rw_mutex_destroy(&globus_l_dsi_rest_share_dns_lock);
+share_dns_lock_init_fail:
+        globus_rw_mutex_destroy(&globus_l_dsi_rest_share_cookie_lock);
+share_cookie_lock_init_fail:
+        globus_rw_mutex_destroy(&globus_l_dsi_rest_share_share_lock);
+share_share_lock_init_fail:
+        globus_mutex_destroy(&globus_i_dsi_rest_handle_cache_mutex);
+mutex_init_fail:
+        curl_share_cleanup(globus_i_dsi_rest_share);
+share_init_fail:
         globus_module_deactivate(GLOBUS_COMMON_MODULE);
     }
 activate_fail:
@@ -77,6 +193,13 @@ globus_l_dsi_rest_deactivate(void)
         curl_easy_cleanup(globus_i_dsi_rest_handle_cache[--globus_i_dsi_rest_handle_cache_index]);
     }
     globus_mutex_unlock(&globus_i_dsi_rest_handle_cache_mutex);
+    curl_share_cleanup(globus_i_dsi_rest_share);
+
+    globus_rw_mutex_destroy(&globus_l_dsi_rest_share_ssl_lock);
+    globus_rw_mutex_destroy(&globus_l_dsi_rest_share_dns_lock);
+    globus_rw_mutex_destroy(&globus_l_dsi_rest_share_cookie_lock);
+    globus_rw_mutex_destroy(&globus_l_dsi_rest_share_share_lock);
+    globus_mutex_destroy(&globus_i_dsi_rest_handle_cache_mutex);
 
     globus_module_deactivate(GLOBUS_COMMON_MODULE);
     curl_global_cleanup();
@@ -85,6 +208,109 @@ globus_l_dsi_rest_deactivate(void)
     return 0;
 }
 /* globus_l_dsi_rest_deactivate() */
+
+static
+void
+globus_l_dsi_rest_share_lock(
+    CURL                               *handle,
+    curl_lock_data                      data,
+    curl_lock_access                    access,
+    void *                              userptr)
+{
+    struct globus_l_dsi_rest_write_lock_owners_s
+                                       *owners = userptr;
+    globus_rw_mutex_t                  *lock = NULL;
+    globus_thread_t                    *owner = NULL;
+
+    assert (data == CURL_LOCK_DATA_SHARE
+            || data == CURL_LOCK_DATA_COOKIE
+            || data == CURL_LOCK_DATA_DNS
+            || data == CURL_LOCK_DATA_SSL_SESSION);
+    assert (access == CURL_LOCK_ACCESS_SHARED
+            || access == CURL_LOCK_ACCESS_SINGLE);
+
+    switch (data)
+    {
+        case CURL_LOCK_DATA_SHARE:
+            lock = &globus_l_dsi_rest_share_share_lock;
+            owner = &owners->share_lock_owner;
+            break;
+        case CURL_LOCK_DATA_COOKIE:
+            lock = &globus_l_dsi_rest_share_cookie_lock;
+            owner = &owners->cookie_lock_owner;
+            break;
+        case CURL_LOCK_DATA_DNS:
+            lock = &globus_l_dsi_rest_share_dns_lock;
+            owner = &owners->dns_lock_owner;
+            break;
+        case CURL_LOCK_DATA_SSL_SESSION:
+            lock = &globus_l_dsi_rest_share_ssl_lock;
+            owner = &owners->ssl_lock_owner;
+            break;
+        default:
+            return;
+    }
+    if (access == CURL_LOCK_ACCESS_SHARED)
+    {
+        globus_rw_mutex_readlock(lock);
+    }
+    else
+    {
+        globus_rw_mutex_writelock(lock);
+        *owner = globus_thread_self();
+    }
+}
+/* globus_l_dsi_rest_share_lock() */
+
+static
+void
+globus_l_dsi_rest_share_unlock(
+    CURL                               *handle,
+    curl_lock_data                      data,
+    void *                              userptr)
+{
+    struct globus_l_dsi_rest_write_lock_owners_s
+                                       *owners = userptr;
+    globus_rw_mutex_t                  *lock = NULL;
+    globus_thread_t                    *owner = NULL;
+
+    assert (data == CURL_LOCK_DATA_SHARE
+            || data == CURL_LOCK_DATA_COOKIE
+            || data == CURL_LOCK_DATA_DNS
+            || data == CURL_LOCK_DATA_SSL_SESSION);
+
+    switch (data)
+    {
+        case CURL_LOCK_DATA_SHARE:
+            lock = &globus_l_dsi_rest_share_share_lock;
+            owner = &owners->share_lock_owner;
+            break;
+        case CURL_LOCK_DATA_COOKIE:
+            lock = &globus_l_dsi_rest_share_cookie_lock;
+            owner = &owners->cookie_lock_owner;
+            break;
+        case CURL_LOCK_DATA_DNS:
+            lock = &globus_l_dsi_rest_share_dns_lock;
+            owner = &owners->dns_lock_owner;
+            break;
+        case CURL_LOCK_DATA_SSL_SESSION:
+            lock = &globus_l_dsi_rest_share_ssl_lock;
+            owner = &owners->ssl_lock_owner;
+            break;
+        default:
+            return;
+    }
+    if (globus_thread_equal(*owner, globus_thread_self()))
+    {
+        memset(owner, 0, sizeof(globus_thread_t));
+        globus_rw_mutex_writeunlock(lock);
+    }
+    else
+    {
+        globus_rw_mutex_readunlock(lock);
+    }
+}
+/* globus_l_dsi_rest_share_unlock() */
 
 globus_module_descriptor_t
 globus_i_dsi_rest_module =

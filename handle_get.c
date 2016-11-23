@@ -50,7 +50,11 @@ globus_i_dsi_rest_handle_get(
         rc = CURLE_OUT_OF_MEMORY;
         goto curlopt_init_fail;
     }
-
+    rc = curl_easy_setopt(curl, CURLOPT_SHARE, globus_i_dsi_rest_share);
+    if (rc != CURLE_OK)
+    {
+        goto curlopt_fail;
+    }
     rc = curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     if (rc != CURLE_OK)
     {

@@ -466,6 +466,7 @@ extern const char * globus_i_dsi_rest_debug_level_names[];
 extern globus_mutex_t                   globus_i_dsi_rest_handle_cache_mutex;
 extern size_t                           globus_i_dsi_rest_handle_cache_index;
 extern CURL                            *globus_i_dsi_rest_handle_cache[];
+extern CURLSH                          *globus_i_dsi_rest_share;
 
 enum { GLOBUS_I_DSI_REST_HANDLE_CACHE_SIZE = 16 };
 

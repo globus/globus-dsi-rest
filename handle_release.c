@@ -53,4 +53,4 @@ globus_i_dsi_rest_handle_release(
     GlobusDsiRestExit();
     return;
 }
-/* globus_i_dsi_rest_handle_get() */
+/* globus_i_dsi_rest_handle_release() */
