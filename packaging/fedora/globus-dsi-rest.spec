@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.20
+Version:	0.21
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Wed Dec 14 2016 Globus Toolkit <support@globus.org> - 0.21-1
+- Favor timeout error over libcurl aborted error
+
 * Wed Nov 23 2016 Globus Toolkit <support@globus.org> - 0.20-1
 - Add curl cookie/ssl/dns resource sharing between handles
 
