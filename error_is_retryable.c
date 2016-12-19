@@ -48,7 +48,11 @@ globus_dsi_rest_error_is_retryable(
     {
         globus_object_t                *err = globus_error_peek(result);
 
-        if (globus_error_match(err,
+        if (globus_error_match(err, GLOBUS_DSI_REST_MODULE, GLOBUS_DSI_REST_ERROR_TIME_OUT))
+        {
+            retryable = true;
+        }
+        else if (globus_error_match(err,
                     GLOBUS_DSI_REST_MODULE,
                     GLOBUS_DSI_REST_ERROR_CURL))
         {

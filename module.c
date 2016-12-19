@@ -19,6 +19,7 @@
 
 const char *                            globus_i_dsi_rest_debug_level_names[] =
 {
+    [GLOBUS_DSI_REST_DATA]            = "DATA",
     [GLOBUS_DSI_REST_TRACE]           = "TRACE",
     [GLOBUS_DSI_REST_INFO]            = "INFO",
     [GLOBUS_DSI_REST_DEBUG]           = "DEBUG",
@@ -159,7 +160,7 @@ globus_l_dsi_rest_activate(void)
     rc = GLOBUS_SUCCESS;
     globus_i_dsi_rest_handle_cache_index = 0;
 
-    GlobusDebugInit(GLOBUS_DSI_REST, TRACE INFO DEBUG WARN ERROR);
+    GlobusDebugInit(GLOBUS_DSI_REST, DATA TRACE INFO DEBUG WARN ERROR);
 
     if (rc != 0)
     {

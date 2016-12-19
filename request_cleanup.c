@@ -55,6 +55,7 @@ globus_i_dsi_rest_request_cleanup(
         }
         free(request->response_headers.key_value);
     }
+    free(request->read_json_arg.buffer);
     free(request);
 }
 /* globus_i_dsi_rest_request_cleanup() */

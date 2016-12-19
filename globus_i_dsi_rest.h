@@ -409,7 +409,10 @@ extern const char * globus_i_dsi_rest_debug_level_names[];
 #define GlobusDsiRestLog(level, ...) \
     do { \
         int level__ = level; \
-        if (level__ > GLOBUS_DSI_REST_ERROR || level__  < 0) { \
+        if (level__ > GLOBUS_DSI_REST_ERROR \
+            || level__  < 0 \
+            || globus_i_dsi_rest_debug_level_names[level__] == NULL) \
+        { \
             level__ = 1; \
         } \
         if (GlobusDebugTrue(GLOBUS_DSI_REST, level__)) \

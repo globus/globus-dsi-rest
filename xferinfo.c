@@ -57,7 +57,7 @@ globus_i_dsi_rest_xferinfo(
         if (result != GLOBUS_SUCCESS)
         {
             rc = CURLE_ABORTED_BY_CALLBACK;
-            if (request->result != GLOBUS_SUCCESS)
+            if (request->result == GLOBUS_SUCCESS)
             {
                 request->result = result;
             }

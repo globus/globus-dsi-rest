@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.21
+Version:	0.22
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,11 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Mon Dec 19 2016 Globus Toolkit <support@globus.org> - 0.22-1
+- Ensure printable log level string is not null.
+- Leak in read_json
+- Prefer timeout error over libcurl aborted by callback error
+
 * Wed Dec 14 2016 Globus Toolkit <support@globus.org> - 0.21-1
 - Favor timeout error over libcurl aborted error
 
