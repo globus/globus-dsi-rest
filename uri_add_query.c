@@ -46,12 +46,13 @@ globus_dsi_rest_uri_add_query(
 
         for (size_t i = 0; i < query_parameters->count; i++)
         {
-            assert(query_parameters->key_value[i].key != NULL);
-            assert(query_parameters->key_value[i].value != NULL);
-
-            complete_uri_len += 2
-                    + 3 * strlen(query_parameters->key_value[i].key)
-                    + 3 * strlen(query_parameters->key_value[i].value);
+            if (query_parameters->key_value[i].key != NULL
+                && query_parameters->key_value[i].value != NULL)
+            {
+                complete_uri_len += 2
+                        + 3 * strlen(query_parameters->key_value[i].key)
+                        + 3 * strlen(query_parameters->key_value[i].value);
+            }
         }
         complete_uri = malloc(complete_uri_len + 1);
         if (complete_uri == NULL)
@@ -70,25 +71,29 @@ globus_dsi_rest_uri_add_query(
 
         for (size_t i = 0; i < query_parameters->count; i++)
         {
-            *(p++) = delim;
-            assert(left > 0);
-            left--;
+            if (query_parameters->key_value[i].key != NULL
+                && query_parameters->key_value[i].value != NULL)
+            {
+                *(p++) = delim;
+                assert(left > 0);
+                left--;
 
-            delim = '&';
+                delim = '&';
 
-            globus_i_dsi_rest_uri_escape(
-                query_parameters->key_value[i].key,
-                &p,
-                &left);
+                globus_i_dsi_rest_uri_escape(
+                    query_parameters->key_value[i].key,
+                    &p,
+                    &left);
 
-            *(p++) = '=';
-            assert(left > 0);
-            left--;
+                *(p++) = '=';
+                assert(left > 0);
+                left--;
 
-            globus_i_dsi_rest_uri_escape(
-                query_parameters->key_value[i].value,
-                &p,
-                &left);
+                globus_i_dsi_rest_uri_escape(
+                    query_parameters->key_value[i].value,
+                    &p,
+                    &left);
+            }
         }
         *p = 0;
         assert(left > 0);

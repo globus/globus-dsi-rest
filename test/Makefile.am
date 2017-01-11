@@ -26,8 +26,8 @@ LDADD = libtest_xio_server.la
 
 libtest_xio_server_la_SOURCES = test-xio-server.c test-xio-server.h
 
-X509_CERT_DIR = $(abs_builddir)
-GRIDMAP = $(abs_builddir)/gridmap
+X509_CERT_DIR = $$($(CYGPATH_W) $(abs_builddir))
+GRIDMAP = $$($(CYGPATH_W) $(abs_builddir)/gridmap)
 TESTS_ENVIRONMENT = \
     export X509_USER_CERT=$$PWD/testcred.cert \
     X509_USER_KEY=$$PWD/testcred.key \
@@ -64,7 +64,6 @@ AM_LDFLAGS = \
 	$(JANSSON_LIBS) \
 	$(OPENSSL_LIBS) \
 	../libglobus_dsi_rest.la
-
 
 complete_callback_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 complete_callback_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)

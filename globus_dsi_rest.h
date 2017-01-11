@@ -346,7 +346,7 @@ globus_dsi_rest_callbacks_t;
  *     The URI of the web resource to access.
  * @param[in] query_parameters
  *     Additional query parameters to append to the request. This may be
- *     NULL.
+ *     NULL. If any query parameter names or values are NULL, they are ignored.
  * @param[in] headers
  *     Additional HTTP headers to append to the request. Other headers
  *     may be added to the request by the DSI REST Helper API.
