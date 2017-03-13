@@ -39,26 +39,19 @@ globus_l_dsi_rest_read_json(
     if (buffer_length > 0)
     {
         /* accumulate json data into a buffer */
-        size_t                          available;
-        size_t                          increase;
         void                           *resized;
 
-        available = jdata->buffer_len - jdata->buffer_used;
-
-        if (available < buffer_length+1)
+        resized = realloc(
+            jdata->buffer, jdata->buffer_len + buffer_length + 1);
+        if (resized == NULL)
         {
-            increase = (((buffer_length+1 - available) / JSON_BLOCK_SIZE) + 1) * JSON_BLOCK_SIZE;
-
-            resized = realloc(jdata->buffer, increase + jdata->buffer_len);
-
-            if (resized == NULL)
-            {
-                result = GlobusDsiRestErrorMemory();
-                goto done;
-            }
-            jdata->buffer = resized;
-            jdata->buffer_len += increase;
+            result = GlobusDsiRestErrorMemory();
+            goto done;
         }
+
+        jdata->buffer = resized;
+        jdata->buffer_len += buffer_length;
+
         memcpy(jdata->buffer + jdata->buffer_used, 
                 buffer,
                 buffer_length);
@@ -69,8 +62,12 @@ globus_l_dsi_rest_read_json(
     else if (jdata->buffer_used > 0) 
     {
         /* Final read, parse json */
-        GlobusDsiRestDebug(jdata->buffer);
-        *jdata->json_out = json_loadb(jdata->buffer, jdata->buffer_used, 0, &error);
+        GlobusDsiRestDebug(
+            "%.*s\n",
+            (int) jdata->buffer_used,
+            jdata->buffer);
+        *jdata->json_out = json_loadb(
+            jdata->buffer, jdata->buffer_used, 0, &error);
         if (*jdata->json_out == NULL)
         {
             result = GlobusDsiRestErrorJson(&error);

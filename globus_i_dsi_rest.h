@@ -84,8 +84,12 @@ struct globus_i_dsi_rest_gridftp_op_arg_s
 
     globus_i_dsi_rest_buffer_t         *pending_buffers;
     globus_i_dsi_rest_buffer_t        **pending_buffers_last;
+
     globus_i_dsi_rest_buffer_t         *current_buffer;
+
     globus_i_dsi_rest_buffer_t         *registered_buffers;
+    int                                 registered_buffers_count;
+
     globus_i_dsi_rest_buffer_t         *free_buffers;
 }
 globus_i_dsi_rest_gridftp_op_arg_t;

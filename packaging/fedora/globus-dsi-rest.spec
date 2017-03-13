@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.23
+Version:	0.24
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Mon Mar 13 2017 Globus Toolkit <support@globus.org> - 0.24-1
+- Use gridftp server recommended number of outstanding buffers
+- Fix format of json log messsage
+
 * Wed Jan 11 2017 Globus Toolkit <support@globus.org> - 0.23-1
 - Allow NULL key or value in URI parameters
 

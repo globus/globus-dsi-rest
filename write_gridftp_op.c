@@ -88,15 +88,24 @@ globus_l_dsi_rest_write_gridftp_op(
                 NULL,
                 &bytes_pending);
 
-        GlobusDsiRestTrace("waiting: op=%p wait_offset=%"PRIu64" result=%#x eof=%s currently_registered=%d bytes_registered=%"GLOBUS_OFF_T_FORMAT" currently_pending=%d bytes_pending=%"GLOBUS_OFF_T_FORMAT"\n",
-                      (void *) gridftp_op_arg->op,
-                      gridftp_op_arg->offset,
-                      gridftp_op_arg->result,
-                      gridftp_op_arg->eof ? "true" : "false",
-                      currently_registered,
-                      bytes_registered,
-                      currently_pending,
-                      bytes_pending);
+        GlobusDsiRestDebug(
+            "waiting: "
+            "op=%p "
+            "wait_offset=%"PRIu64" "
+            "result=%#x "
+            "eof=%s "
+            "currently_registered=%d "
+            "bytes_registered=%"GLOBUS_OFF_T_FORMAT" "
+            "currently_pending=%d "
+            "bytes_pending=%"GLOBUS_OFF_T_FORMAT"\n",
+            (void *) gridftp_op_arg->op,
+            gridftp_op_arg->offset,
+            gridftp_op_arg->result,
+            gridftp_op_arg->eof ? "true" : "false",
+            currently_registered,
+            bytes_registered,
+            currently_pending,
+            bytes_pending);
 
         globus_cond_wait(&gridftp_op_arg->cond, &gridftp_op_arg->mutex);
     }
@@ -187,14 +196,21 @@ globus_l_dsi_rest_gridftp_read_callback(
 
     GlobusDsiRestLogResult(GLOBUS_DSI_REST_TRACE, result);
 
-    GlobusDsiRestDebug("op=%p result=%#x buffer=%p nbytes=%zd offset=%"PRIuMAX" eof=%d user_arg=%p\n",
-            (void *) op,
-            result,
-            (void *) buffer,
-            (size_t) nbytes,
-            (uintmax_t) offset,
-            (int) eof,
-            user_arg);
+    GlobusDsiRestDebug(
+        "op=%p "
+        "result=%#x "
+        "buffer=%p "
+        "nbytes=%zd "
+        "offset=%"PRIuMAX" "
+        "eof=%d "
+        "user_arg=%p\n",
+        (void *) op,
+        result,
+        (void *) buffer,
+        (size_t) nbytes,
+        (uintmax_t) offset,
+        (int) eof,
+        user_arg);
 
     globus_mutex_lock(&gridftp_op_arg->mutex);
 
@@ -413,12 +429,14 @@ globus_l_dsi_rest_write_register_reads(
                 this_read = remaining;
             }
 
-            GlobusDsiRestTrace("register_read: "
+            GlobusDsiRestDebug("register_read: "
                     "op=%p "
                     "rest_buffer=%p "
-                    "this_read=%"GLOBUS_OFF_T_FORMAT"\n",
+                    "buffer=%p "
+                    "length=%"GLOBUS_OFF_T_FORMAT"\n",
                     (void *) gridftp_op_arg->op,
                     (void *) buffer,
+                    (void *) buffer->buffer,
                     this_read);
 
             result = globus_gridftp_server_register_read(

@@ -52,27 +52,24 @@ globus_l_dsi_rest_read_gridftp_op(
 
     globus_mutex_lock(&gridftp_op_arg->mutex);
 
-    /* Push final buffer at EOF */
-    if (buffer_length == 0)
-    {
-        *gridftp_op_arg->pending_buffers_last = gridftp_op_arg->current_buffer;
-        if (gridftp_op_arg->current_buffer != NULL)
-        {
-            gridftp_op_arg->pending_buffers_last = &gridftp_op_arg->current_buffer->next;
-        }
-        else
-        {
-            gridftp_op_arg->pending_buffers_last = &gridftp_op_arg->pending_buffers;
-        }
-        gridftp_op_arg->current_buffer = NULL;
-    }
-
-    while (buffer_length > 0)
+    do
     {
         size_t                          copy_size;
         globus_i_dsi_rest_buffer_t     *current_buffer;
+        int                             optimal_concurrency = 0;
 
-        current_buffer = globus_i_dsi_rest_buffer_get(gridftp_op_arg, buffer_length);
+        globus_gridftp_server_get_optimal_concurrency(
+                gridftp_op_arg->op,
+                &optimal_concurrency);
+
+        while (gridftp_op_arg->registered_buffers_count >= optimal_concurrency)
+        {
+            globus_cond_wait(&gridftp_op_arg->cond, &gridftp_op_arg->mutex);
+        }
+
+        current_buffer = globus_i_dsi_rest_buffer_get(
+            gridftp_op_arg,
+            buffer_length);
 
         if (current_buffer == NULL)
         {
@@ -81,7 +78,8 @@ globus_l_dsi_rest_read_gridftp_op(
             goto out;
         }
 
-        if (buffer_length > (current_buffer->buffer_len - current_buffer->buffer_used))
+        if (buffer_length > (
+                current_buffer->buffer_len - current_buffer->buffer_used))
         {
             copy_size = current_buffer->buffer_len
                       - current_buffer->buffer_used;
@@ -91,29 +89,39 @@ globus_l_dsi_rest_read_gridftp_op(
             copy_size = buffer_length;
         }
 
-        assert(copy_size > 0);
+        assert(eof || copy_size > 0);
 
-        memcpy(current_buffer->buffer + current_buffer->buffer_used,
-               buffer,
-               copy_size);
+        memcpy(
+            current_buffer->buffer + current_buffer->buffer_used,
+            buffer,
+            copy_size);
 
         current_buffer->buffer_used += copy_size;
         buffer = ((char *) buffer) + copy_size;
         buffer_length -= copy_size;
 
-        if (current_buffer->buffer_used == current_buffer->buffer_len)
+        if (eof || current_buffer->buffer_used == current_buffer->buffer_len)
         {
             *gridftp_op_arg->pending_buffers_last = current_buffer;
             gridftp_op_arg->pending_buffers_last = &current_buffer->next;
             gridftp_op_arg->current_buffer = NULL;
         }
+
+        if (gridftp_op_arg->pending_buffers != NULL)
+        {
+            result = globus_l_dsi_rest_send_pending(gridftp_op_arg);
+            if (result != GLOBUS_SUCCESS)
+            {
+                goto send_fail;
+            }
+        }
     }
+    while (buffer_length > 0);
 
-    result = globus_l_dsi_rest_send_pending(gridftp_op_arg);
-
+send_fail:
     if (eof)
     {
-        while (gridftp_op_arg->registered_buffers != NULL)
+        while (gridftp_op_arg->registered_buffers_count != 0)
         {
             globus_cond_wait(
                     &gridftp_op_arg->cond,
@@ -158,9 +166,17 @@ globus_l_dsi_rest_send_pending(
 
         buffer = gridftp_op_arg->pending_buffers;
 
-            GlobusDsiRestTrace("Registering read op=%p rest_buffer=%p\n",
-                          gridftp_op_arg->op,
-                          (void *) buffer);
+        GlobusDsiRestDebug(
+            "register_write op=%p "
+            "rest_buffer=%p "
+            "buffer=%p "
+            "length=%"GLOBUS_OFF_T_FORMAT" "
+            "offset=%"GLOBUS_OFF_T_FORMAT"\n",
+            gridftp_op_arg->op,
+            (void *) buffer,
+            (void *) buffer->buffer,
+            (globus_off_t) buffer->buffer_used,
+            (globus_off_t) gridftp_op_arg->offset);
         result = globus_gridftp_server_register_write(
                 gridftp_op_arg->op,
                 buffer->buffer,
@@ -178,12 +194,14 @@ globus_l_dsi_rest_send_pending(
             }
             goto out;
         }
+        gridftp_op_arg->registered_buffers_count++;
         gridftp_op_arg->offset += buffer->buffer_used;
         gridftp_op_arg->pending_buffers = buffer->next;
 
         if (gridftp_op_arg->pending_buffers == NULL)
         {
-            gridftp_op_arg->pending_buffers_last = &gridftp_op_arg->pending_buffers;
+            gridftp_op_arg->pending_buffers_last =
+                &gridftp_op_arg->pending_buffers;
         }
         buffer->next = gridftp_op_arg->registered_buffers;
         gridftp_op_arg->registered_buffers = buffer;
@@ -232,6 +250,14 @@ globus_l_dsi_rest_gridftp_write_callback(
 
     GlobusDsiRestEnter();
 
+    GlobusDsiRestDebug(
+        "write_callback op=%p "
+        "buffer=%p "
+        "length=%"GLOBUS_OFF_T_FORMAT"\n",
+        gridftp_op_arg->op,
+        (void *) buffer,
+        (globus_off_t) nbytes);
+
     globus_mutex_lock(&gridftp_op_arg->mutex);
 
     ptr = gridftp_op_arg->registered_buffers;
@@ -251,12 +277,9 @@ globus_l_dsi_rest_gridftp_write_callback(
         last_next = &ptr->next;
         ptr = ptr->next;
     }
+    gridftp_op_arg->registered_buffers_count--;
+    globus_cond_signal(&gridftp_op_arg->cond);
 
-    if (gridftp_op_arg->pending_buffers == NULL
-        && gridftp_op_arg->registered_buffers == NULL)
-    {
-        globus_cond_signal(&gridftp_op_arg->cond);
-    }
     globus_mutex_unlock(&gridftp_op_arg->mutex);
 
     GlobusDsiRestExit();
