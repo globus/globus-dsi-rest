@@ -1,9 +1,10 @@
-globus-dsi-rest (0.24-1+gt6.@distro@) @distro@; urgency=low
+globus-dsi-rest (0.25-1+gt6.@distro@) @distro@; urgency=low
 
   * Use gridftp server recommended number of outstanding buffers
   * Fix format of json log messsage
+  * Don't run gridftp server fork tests as root
 
- -- Globus Toolkit <support@globus.org>  Mon, 13 Jan 2017 11:44:16 -0400
+ -- Globus Toolkit <support@globus.org>  Mon, 13 Jan 2017 13:05:40 -0400
 
 globus-dsi-rest (0.23-1+gt6.@distro@) @distro@; urgency=low
 

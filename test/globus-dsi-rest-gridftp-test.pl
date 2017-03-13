@@ -95,5 +95,8 @@ my @tests=qw( write_small_test write_big_test read_small_test read_big_test);
 plan tests => scalar(@tests);
 
 foreach (@tests) {
-    eval "&$_";
+    SKIP: {
+        skip "Can't run as root", 1 unless $< != 0;
+        eval "&$_";
+    }
 }
