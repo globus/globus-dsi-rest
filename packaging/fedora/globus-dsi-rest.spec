@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.24
+Version:	0.25
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Fri Mar 17 2017 Globus Toolkit <support@globus.org> - 0.25-1
+- Don't send an empty buffer at end of file in read_gridft_op
+
 * Mon Mar 13 2017 Globus Toolkit <support@globus.org> - 0.24-1
 - Use gridftp server recommended number of outstanding buffers
 - Fix format of json log messsage

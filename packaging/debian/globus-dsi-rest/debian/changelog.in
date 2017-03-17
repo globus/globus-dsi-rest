@@ -1,3 +1,9 @@
+globus-dsi-rest (0.25-1+gt6.@distro@) @distro@; urgency=low
+
+  * Don't send an empty buffer at end of file in read_gridft_op
+
+ -- Globus Toolkit <support@globus.org>  Fri, 17 Jan 2017 16:27:42 -0400
+
 globus-dsi-rest (0.24-1+gt6.@distro@) @distro@; urgency=low
 
   * Use gridftp server recommended number of outstanding buffers

@@ -74,6 +74,11 @@ sub write_small_test
     write_test(12, "write_small_test");
 }
 
+sub write_boundary_test
+{
+    write_test(2*256*1024, "write_boundary_test");
+}
+
 sub write_big_test
 {
     write_test(5000000, "write_big_test");
@@ -84,13 +89,17 @@ sub read_small_test
     read_test(12, "read_small_test");
 }
 
+sub read_boundary_test
+{
+    read_test(2*256*1024, "read_boundary_test");
+}
 sub read_big_test
 {
     read_test(5000000, "read_big_test");
 }
 
 
-my @tests=qw( write_small_test write_big_test read_small_test read_big_test);
+my @tests=qw( write_small_test write_boundary_test write_big_test read_small_test read_boundary_test read_big_test);
 
 plan tests => scalar(@tests);
 

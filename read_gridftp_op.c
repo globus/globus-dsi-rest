@@ -58,49 +58,63 @@ globus_l_dsi_rest_read_gridftp_op(
         globus_i_dsi_rest_buffer_t     *current_buffer;
         int                             optimal_concurrency = 0;
 
-        globus_gridftp_server_get_optimal_concurrency(
-                gridftp_op_arg->op,
-                &optimal_concurrency);
-
-        while (gridftp_op_arg->registered_buffers_count >= optimal_concurrency)
+        if (eof)
         {
-            globus_cond_wait(&gridftp_op_arg->cond, &gridftp_op_arg->mutex);
-        }
-
-        current_buffer = globus_i_dsi_rest_buffer_get(
-            gridftp_op_arg,
-            buffer_length);
-
-        if (current_buffer == NULL)
-        {
-            gridftp_op_arg->result = GlobusDsiRestErrorMemory();
-
-            goto out;
-        }
-
-        if (buffer_length > (
-                current_buffer->buffer_len - current_buffer->buffer_used))
-        {
-            copy_size = current_buffer->buffer_len
-                      - current_buffer->buffer_used;
+            /* OK if this is NULL */
+            current_buffer = gridftp_op_arg->current_buffer;
         }
         else
         {
-            copy_size = buffer_length;
+            globus_gridftp_server_get_optimal_concurrency(
+                    gridftp_op_arg->op,
+                    &optimal_concurrency);
+
+            while (gridftp_op_arg->registered_buffers_count
+                    >= optimal_concurrency)
+            {
+                globus_cond_wait(
+                    &gridftp_op_arg->cond,
+                    &gridftp_op_arg->mutex);
+            }
+
+            current_buffer = globus_i_dsi_rest_buffer_get(
+                gridftp_op_arg,
+                buffer_length);
+
+            if (current_buffer == NULL)
+            {
+                gridftp_op_arg->result = GlobusDsiRestErrorMemory();
+
+                goto out;
+            }
+
+            if (buffer_length > (
+                    current_buffer->buffer_len - current_buffer->buffer_used))
+            {
+                copy_size = current_buffer->buffer_len
+                          - current_buffer->buffer_used;
+            }
+            else
+            {
+                copy_size = buffer_length;
+            }
+
+            assert(copy_size > 0);
+
+            memcpy(
+                current_buffer->buffer + current_buffer->buffer_used,
+                buffer,
+                copy_size);
+
+            current_buffer->buffer_used += copy_size;
+            buffer = ((char *) buffer) + copy_size;
+            buffer_length -= copy_size;
         }
 
-        assert(eof || copy_size > 0);
-
-        memcpy(
-            current_buffer->buffer + current_buffer->buffer_used,
-            buffer,
-            copy_size);
-
-        current_buffer->buffer_used += copy_size;
-        buffer = ((char *) buffer) + copy_size;
-        buffer_length -= copy_size;
-
-        if (eof || current_buffer->buffer_used == current_buffer->buffer_len)
+        /* Enqueue complete buffers or last buffer that is non-empty */
+        if ((eof && current_buffer != NULL && current_buffer->buffer_used > 0)
+            || (current_buffer != NULL
+                && current_buffer->buffer_used == current_buffer->buffer_len))
         {
             *gridftp_op_arg->pending_buffers_last = current_buffer;
             gridftp_op_arg->pending_buffers_last = &current_buffer->next;
