@@ -67,6 +67,16 @@ globus_l_dsi_rest_write_gridftp_op(
         gridftp_op_arg->result = result;
     }
 
+    /*
+     * If this file section is completely read, we don't need to bother with
+     * registering reads
+     */
+    if (gridftp_op_arg->offset == gridftp_op_arg->end_offset)
+    {
+        gridftp_op_arg->eof = true;
+        goto done;
+    }
+
     while ((!globus_l_dsi_rest_is_transfer_offset_ready(gridftp_op_arg))
            && (!globus_l_dsi_rest_is_reading_complete(gridftp_op_arg)))
     {

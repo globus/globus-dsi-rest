@@ -1,8 +1,14 @@
+globus-dsi-rest (0.27-1+gt6.@distro@) @distro@; urgency=low
+
+  * Fix hang when writing a 0 byte range.
+
+ -- Globus Toolkit <support@globus.org>  Wed, 22 Mar 2017 13:34:37 -0400
+
 globus-dsi-rest (0.26-1+gt6.@distro@) @distro@; urgency=low
 
   * Don't send an empty buffer at end of file in read_gridft_op
 
- -- Globus Toolkit <support@globus.org>  Fri, 17 Jan 2017 16:27:42 -0400
+ -- Globus Toolkit <support@globus.org>  Fri, 17 Mar 2017 16:27:42 -0400
 
 globus-dsi-rest (0.25-1+gt6.@distro@) @distro@; urgency=low
 
@@ -10,7 +16,7 @@ globus-dsi-rest (0.25-1+gt6.@distro@) @distro@; urgency=low
   * Fix format of json log messsage
   * Don't run gridftp server fork tests as root
 
- -- Globus Toolkit <support@globus.org>  Mon, 13 Jan 2017 13:05:40 -0400
+ -- Globus Toolkit <support@globus.org>  Mon, 13 Mar 2017 13:05:40 -0400
 
 globus-dsi-rest (0.23-1+gt6.@distro@) @distro@; urgency=low
 

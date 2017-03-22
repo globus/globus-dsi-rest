@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.26
+Version:	0.27
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Wed Mar 22 2017 Globus Toolkit <support@globus.org> - 0.27-1
+- Fix hang when writing a 0 byte range.
+
 * Fri Mar 17 2017 Globus Toolkit <support@globus.org> - 0.26-1
 - Don't send an empty buffer at end of file in read_gridft_op
 
