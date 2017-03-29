@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.27
+Version:	0.28
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,11 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Wed Mar 29 2017 Globus Toolkit <support@globus.org> - 0.28-1
+- Add multipart reader
+- Increase JSON parser error string verbosity to help debug
+  API calls that sometimes return non-JSON in an error situation
+
 * Wed Mar 22 2017 Globus Toolkit <support@globus.org> - 0.27-1
 - Fix hang when writing a 0 byte range.
 

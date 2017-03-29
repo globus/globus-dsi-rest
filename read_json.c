@@ -29,7 +29,6 @@ globus_l_dsi_rest_read_json(
     void                               *buffer,
     size_t                              buffer_length)
 {
-    const size_t                        JSON_BLOCK_SIZE = 256;
     globus_i_dsi_rest_read_json_arg_t  *jdata = read_callback_arg;
     globus_result_t                     result = GLOBUS_SUCCESS;
     json_error_t                        error;
@@ -70,7 +69,8 @@ globus_l_dsi_rest_read_json(
             jdata->buffer, jdata->buffer_used, 0, &error);
         if (*jdata->json_out == NULL)
         {
-            result = GlobusDsiRestErrorJson(&error);
+            result = GlobusDsiRestErrorJson(
+                jdata->buffer, jdata->buffer_used, &error);
         }
     }
     else

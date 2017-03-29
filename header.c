@@ -31,10 +31,7 @@ globus_i_dsi_rest_header(
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
     size_t                              total = size * nitems;
-    const size_t                        HEADER_ALLOC_CHUNK_SIZE = 8;
     globus_i_dsi_rest_request_t        *request = callback_arg;
-    char                               *k, *v;
-    char                               *kstring, *vstring;
 
     GlobusDsiRestEnter();
 
@@ -62,66 +59,26 @@ globus_i_dsi_rest_header(
         GlobusDsiRestDebug("%.*s", (int) (size*nitems), buffer); 
     }
 
-    if (request->response_callback == NULL)
+    if (request->response_callback == NULL
+        && request->read_part.data_read_callback
+            != globus_dsi_rest_read_multipart)
     {
         /* Don't bother parsing if client doesn't care */
         goto done;
     }
 
-    if (request->response_headers.key_value == NULL
-        || (request->response_headers.count > 0 &&
-            request->response_headers.count % HEADER_ALLOC_CHUNK_SIZE) == 0)
+    result = globus_i_dsi_rest_header_parse(
+        &request->read_part.headers,
+        buffer,
+        total);
+
+    if (result != GLOBUS_SUCCESS)
     {
-        size_t                          count;
-        globus_dsi_rest_key_value_t    *tmp;
-
-        count = request->response_headers.count;
-
-        tmp = realloc(request->response_headers.key_value,
-                (count  + HEADER_ALLOC_CHUNK_SIZE)
-                * sizeof(globus_dsi_rest_key_value_t));
-        if (tmp == NULL)
+        if (request->result == GLOBUS_SUCCESS)
         {
-            result = GlobusDsiRestErrorMemory();
-
-            if (request->result != GLOBUS_SUCCESS)
-            {
-                request->result = GlobusDsiRestErrorMemory();
-            }
-            goto done;
+            request->result = result;
         }
-        request->response_headers.key_value = tmp;
-    }
-
-    if (memchr(buffer, ':', total) != NULL)
-    {
-        k = buffer;
-        v = memchr(k, ':', total);
-        if (v == NULL || k == v)
-        {
-            request->result = GlobusDsiRestErrorParse(buffer);
-            goto done;
-        }
-        kstring = malloc(v-k+1);
-        snprintf(kstring, v-k+1, "%s", k);
-
-        v++;
-        while (*v == ' ' || *v == '\t')
-        {
-            v++;
-        }
-        vstring = malloc(total - (v-buffer) + 1);
-        snprintf(vstring, total - (v-buffer) + 1, "%s", v);
-        if ((v = strchr(vstring, '\r')) != NULL)
-        {
-            *v = 0;
-        }
-
-        request->response_headers.key_value[request->response_headers.count++] =
-        (globus_dsi_rest_key_value_t) {
-            .key = kstring,
-            .value = vstring
-        };
+        goto done;
     }
 
     if (memcmp(buffer, "\r\n", 2) == 0)
@@ -133,14 +90,14 @@ globus_i_dsi_rest_header(
              */
             request->response_code = 0;
             request->response_reason[0] = 0;
-            for (size_t i = 0; i < request->response_headers.count; i++)
+            for (size_t i = 0; i < request->read_part.headers.count; i++)
             {
-                free((char *) request->response_headers.key_value[i].key);
-                free((char *) request->response_headers.key_value[i].value);
+                free((char *) request->read_part.headers.key_value[i].key);
+                free((char *) request->read_part.headers.key_value[i].value);
             }
-            free(request->response_headers.key_value);
-            request->response_headers.key_value = NULL;
-            request->response_headers.count = 0;
+            free(request->read_part.headers.key_value);
+            request->read_part.headers.key_value = NULL;
+            request->read_part.headers.count = 0;
         }
         else
         {
@@ -155,11 +112,91 @@ globus_i_dsi_rest_header(
                 response->response_bytes_downloaded =
                         request->response_bytes_downloaded;
             }
-            result = request->response_callback(
-                request->response_callback_arg,
-                request->response_code,
-                request->response_reason,
-                &request->response_headers);
+            if (request->read_part.data_read_callback
+                == globus_dsi_rest_read_multipart)
+            {
+                const char             *boundary = NULL;
+                const char             *boundary_end = NULL;
+                globus_i_dsi_rest_read_multipart_arg_t
+                                       *read_multipart
+                                       = request->read_part.data_read_callback_arg;
+
+                for (size_t i = 0; i < request->read_part.headers.count; i++)
+                {
+                    if (strcasecmp(
+                            request->read_part.headers.key_value[i].key,
+                            "Content-Type") == 0
+                        && strncasecmp(
+                            request->read_part.headers.key_value[i].value,
+                            "multipart/",
+                            strlen("multipart/")) == 0)
+                    {
+                        boundary = strcasestr(
+                            request->read_part.headers.key_value[i].value,
+                            "boundary=");
+                        boundary += strlen("boundary=");
+                        if (*boundary == '"')
+                        {
+                            boundary++;
+                            for (size_t b = 0; boundary[b] != 0; b++)
+                            {
+                                if (boundary[b] == '"')
+                                {
+                                    boundary_end = &boundary[b-1];
+                                }
+                                if (boundary[b] == '\\')
+                                {
+                                    b++;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (size_t b = 0; boundary[b] != 0; b++)
+                            {
+                                if (isspace(boundary[b]))
+                                {
+                                    boundary_end = &boundary[b-1];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (boundary != NULL)
+                {
+                    if (boundary_end != NULL)
+                    {
+                        read_multipart->boundary =
+                            globus_common_create_string(
+                                "%.*s",
+                                (int) (boundary_end - boundary),
+                                boundary);
+                    }
+                    else
+                    {
+                        read_multipart->boundary =
+                            globus_common_create_string(
+                                "%s", boundary);
+                    }
+
+                    read_multipart->boundary_length = strlen(
+                        read_multipart->boundary);
+                    read_multipart->boundary_buffer_length = 
+                        read_multipart->boundary_length + 9;
+                    read_multipart->boundary_buffer = malloc(
+                        read_multipart->boundary_buffer_length);
+                    read_multipart->boundary_buffer_offset = 0;
+                }
+            }
+            if (request->response_callback != NULL)
+            {
+                result = request->response_callback(
+                    request->response_callback_arg,
+                    request->response_code,
+                    request->response_reason,
+                    &request->read_part.headers);
+            }
         }
     }
 

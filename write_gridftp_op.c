@@ -233,7 +233,8 @@ globus_l_dsi_rest_gridftp_read_callback(
     if (gridftp_op_arg->end_offset != 0 &&
         (offset + nbytes) == (gridftp_op_arg->end_offset))
     {
-        signal = eof = true;
+        signal = true;
+        eof = true;
     }
 
 

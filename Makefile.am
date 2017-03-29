@@ -34,6 +34,7 @@ libglobus_dsi_rest_la_SOURCES = \
 	handle_get.c \
 	handle_release.c \
 	header.c \
+	header_parse.c \
 	module.c \
 	multipart_boundary_prepare.c \
 	perform.c \
@@ -41,6 +42,7 @@ libglobus_dsi_rest_la_SOURCES = \
 	progress_idle_timeout.c \
 	read_data.c \
 	read_gridftp_op.c \
+        read_multipart.c \
 	read_json.c \
 	request.c \
 	request_cleanup.c \

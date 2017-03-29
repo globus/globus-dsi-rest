@@ -1,3 +1,11 @@
+globus-dsi-rest (0.28-1+gt6.@distro@) @distro@; urgency=low
+
+  * Add multipart reader
+  * Increase JSON parser error string verbosity to help debug
+    API calls that sometimes return non-JSON in an error situation
+
+ -- Globus Toolkit <support@globus.org>  Wed, 29 Mar 2017 16:29:15 -0400
+
 globus-dsi-rest (0.27-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix hang when writing a 0 byte range.

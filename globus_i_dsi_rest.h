@@ -96,7 +96,7 @@ globus_i_dsi_rest_gridftp_op_arg_t;
 
 
 typedef
-struct globus_i_dsi_rest_multipart_arg_s
+struct globus_i_dsi_rest_write_multipart_arg_s
 {
     char                               *boundary;
     size_t                              num_parts;
@@ -104,25 +104,68 @@ struct globus_i_dsi_rest_multipart_arg_s
     char                               *current_boundary;
     size_t                              current_boundary_offset;
     size_t                              current_boundary_length;
-    struct globus_i_dsi_rest_part_s    *parts;
+    struct globus_i_dsi_rest_write_part_s
+                                       *parts;
 }
-globus_i_dsi_rest_multipart_arg_t;
+globus_i_dsi_rest_write_multipart_arg_t;
 
 typedef
-struct globus_i_dsi_rest_part_s
+struct globus_i_dsi_rest_write_block_arg_s
+{
+    /** Data to send to the server */
+    void                               *block_data;
+    /** Length of the data */
+    size_t                              block_len;
+    /** Current write offset */
+    size_t                              offset;
+}
+globus_i_dsi_rest_write_block_arg_t;
+
+typedef
+struct globus_i_dsi_rest_write_part_s
 {
     globus_dsi_rest_key_array_t         headers;
     globus_dsi_rest_key_array_t         malloced_headers;
 
     globus_dsi_rest_write_t             data_write_callback;
     void                               *data_write_callback_arg;
-
-    globus_dsi_rest_write_block_arg_t   write_block_callback_arg;
-    globus_dsi_rest_write_block_arg_t   write_block_callback_arg_orig;
-    globus_i_dsi_rest_gridftp_op_arg_t  gridftp_op_arg;
-    globus_i_dsi_rest_multipart_arg_t   multipart_write_arg;
 }
-globus_i_dsi_rest_part_t;
+globus_i_dsi_rest_write_part_t;
+
+typedef
+struct globus_i_dsi_rest_read_part_s
+{
+    globus_dsi_rest_key_array_t         headers;
+
+    globus_dsi_rest_response_t          response_callback;
+    void                               *response_callback_arg;
+
+    globus_dsi_rest_read_t              data_read_callback;
+    void                               *data_read_callback_arg;
+}
+globus_i_dsi_rest_read_part_t;
+
+typedef
+struct globus_i_dsi_rest_read_multipart_arg_s
+{
+    size_t                              num_parts;
+    size_t                              part_index;
+    globus_i_dsi_rest_read_part_t      *parts;
+
+    char                               *boundary;
+    size_t                              boundary_length;
+
+    char                               *boundary_buffer;
+    size_t                              boundary_buffer_length;
+    size_t                              boundary_buffer_offset;
+    
+    size_t                              match_counter;
+
+    bool                                need_header;
+    char                               *header_buffer;
+    size_t                              header_buffer_offset;
+}
+globus_i_dsi_rest_read_multipart_arg_t;
 
 /**
  * @brief Data Structure for request state
@@ -136,7 +179,6 @@ struct globus_i_dsi_rest_request_s
     int                                 response_code;
     char                                response_reason[64];
     struct curl_slist                  *request_headers;
-    globus_dsi_rest_key_array_t         response_headers;
     char                               *complete_uri;
 
     off_t                               request_bytes_uploaded;
@@ -144,12 +186,8 @@ struct globus_i_dsi_rest_request_s
 
     globus_thread_t                     thread;
 
-    globus_i_dsi_rest_part_t            write_part;
-    globus_i_dsi_rest_read_json_arg_t   read_json_arg;
-    globus_i_dsi_rest_gridftp_op_arg_t  read_gridftp_op_arg;
-
-    globus_dsi_rest_read_t              data_read_callback;
-    void                               *data_read_callback_arg;
+    globus_i_dsi_rest_write_part_t      write_part;
+    globus_i_dsi_rest_read_part_t       read_part;
 
     globus_dsi_rest_response_t          response_callback;
     void                               *response_callback_arg;
@@ -277,6 +315,12 @@ globus_i_dsi_rest_header(
     size_t                              nitems,
     void                               *callback_arg);
 
+globus_result_t
+globus_i_dsi_rest_header_parse(
+    globus_dsi_rest_key_array_t        *headers,
+    char                               *buffer,
+    size_t                              size);
+
 size_t
 globus_i_dsi_rest_write_data(
     char                               *ptr,
@@ -311,8 +355,8 @@ enum
     globus_error_put(GlobusDsiRestErrorParseObject(s))
 #define GlobusDsiRestErrorCurl(rc) \
     globus_error_put(GlobusDsiRestErrorCurlObject(rc))
-#define GlobusDsiRestErrorJson(err) \
-    globus_error_put(GlobusDsiRestErrorJsonObject(err))
+#define GlobusDsiRestErrorJson(buffer, buffer_len, err) \
+    globus_error_put(GlobusDsiRestErrorJsonObject(buffer, buffer_len, err))
 #define GlobusDsiRestErrorTimeOut() \
     globus_error_put(GlobusDsiRestErrorTimeOutObject())
 #define GlobusDsiRestErrorThreadFail(rc) \
@@ -358,7 +402,7 @@ enum
         __func__, \
         __LINE__, \
         "libcurl error %d: %s", rc, curl_easy_strerror(rc))
-#define GlobusDsiRestErrorJsonObject(err) \
+#define GlobusDsiRestErrorJsonObject(buffer, buffer_len, err) \
     globus_error_construct_error( \
         GLOBUS_DSI_REST_MODULE, \
         NULL, \
@@ -366,7 +410,8 @@ enum
         __FILE__, \
         __func__, \
         __LINE__, \
-        "json error %s", (err)->text)
+        "Error parsing \"%.*s\" as json: %s", \
+        (int) buffer_len, buffer, (err)->text)
 #define GlobusDsiRestErrorTimeOutObject() \
     globus_error_construct_error( \
         GLOBUS_DSI_REST_MODULE, \

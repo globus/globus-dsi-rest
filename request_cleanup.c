@@ -23,8 +23,13 @@
 #include "globus_i_dsi_rest.h"
 static
 void
-globus_l_dsi_rest_request_cleanup_part(
-    globus_i_dsi_rest_part_t           *part);
+globus_l_dsi_rest_request_cleanup_write_part(
+    globus_i_dsi_rest_write_part_t     *part);
+
+static
+void
+globus_l_dsi_rest_request_cleanup_read_part(
+    globus_i_dsi_rest_read_part_t      *read_part);
 
 void
 globus_i_dsi_rest_request_cleanup(
@@ -44,26 +49,18 @@ globus_i_dsi_rest_request_cleanup(
     globus_i_dsi_rest_handle_release(request->handle);
     request->handle = NULL;
 
-    globus_l_dsi_rest_request_cleanup_part(&request->write_part);
+    globus_l_dsi_rest_request_cleanup_write_part(&request->write_part);
+    globus_l_dsi_rest_request_cleanup_read_part(&request->read_part);
 
-    if (request->response_headers.key_value != NULL)
-    {
-        for (size_t i = 0; i < request->response_headers.count; i++)
-        {
-            free((char *) request->response_headers.key_value[i].key);
-            free((char *) request->response_headers.key_value[i].value);
-        }
-        free(request->response_headers.key_value);
-    }
-    free(request->read_json_arg.buffer);
+
     free(request);
 }
 /* globus_i_dsi_rest_request_cleanup() */
 
 static
 void
-globus_l_dsi_rest_request_cleanup_part(
-    globus_i_dsi_rest_part_t           *part)
+globus_l_dsi_rest_request_cleanup_write_part(
+    globus_i_dsi_rest_write_part_t     *part)
 {
     free(part->headers.key_value);
     for (size_t i = 0; i < part->malloced_headers.count; i++)
@@ -76,23 +73,105 @@ globus_l_dsi_rest_request_cleanup_part(
     if (part->data_write_callback == globus_dsi_rest_write_json
         || part->data_write_callback == globus_dsi_rest_write_form)
     {
-        free(part->write_block_callback_arg_orig.block_data);
-    }
+        globus_i_dsi_rest_write_block_arg_t
+                                       *arg = part->data_write_callback_arg; 
+        free(arg->block_data);
+        arg->block_data = NULL;
 
-    if (part->data_write_callback == globus_dsi_rest_write_gridftp_op)
-    {
-        globus_mutex_destroy(&part->gridftp_op_arg.mutex);
-        globus_cond_destroy(&part->gridftp_op_arg.cond);
+        free(arg);
+        part->data_write_callback_arg = NULL;
     }
-    if (part->data_write_callback == globus_dsi_rest_write_multipart)
+    else if (part->data_write_callback == globus_dsi_rest_write_gridftp_op)
     {
-        for (size_t i = 0; i < part->multipart_write_arg.num_parts; i++)
+        globus_i_dsi_rest_gridftp_op_arg_t 
+                                       *arg = part->data_write_callback_arg;
+
+        globus_mutex_destroy(&arg->mutex);
+        globus_cond_destroy(&arg->cond);
+        free(arg);
+        part->data_write_callback_arg = NULL;
+    }
+    else if (part->data_write_callback == globus_dsi_rest_write_multipart)
+    {
+        globus_i_dsi_rest_write_multipart_arg_t
+                                       *arg = part->data_write_callback_arg;
+
+        for (size_t i = 0; i < arg->num_parts; i++)
         {
-            globus_l_dsi_rest_request_cleanup_part(
-                    &part->multipart_write_arg.parts[i]);
+            globus_l_dsi_rest_request_cleanup_write_part(&arg->parts[i]);
         }
-        free(part->multipart_write_arg.boundary);
-        free(part->multipart_write_arg.current_boundary);
-        free(part->multipart_write_arg.parts);
+        free(arg->boundary);
+        free(arg->current_boundary);
+        free(arg->parts);
     }
 }
+/* globus_l_dsi_rest_request_cleanup_write_part() */
+
+static
+void
+globus_l_dsi_rest_request_cleanup_read_part(
+    globus_i_dsi_rest_read_part_t      *read_part)
+{
+    if (read_part->headers.key_value != NULL)
+    {
+        for (size_t i = 0; i < read_part->headers.count; i++)
+        {
+            free((char *) read_part->headers.key_value[i].key);
+            free((char *) read_part->headers.key_value[i].value);
+        }
+        free(read_part->headers.key_value);
+    }
+
+    if (read_part->data_read_callback == globus_dsi_rest_read_json)
+    {
+        globus_i_dsi_rest_read_json_arg_t
+                                       *arg = read_part->data_read_callback_arg;
+        
+        if (arg != NULL)
+        {
+            free(arg->buffer);
+            arg->buffer = NULL;
+
+            free(arg);
+        }
+        read_part->data_read_callback_arg = NULL;
+    }
+    else if (read_part->data_read_callback == globus_dsi_rest_read_gridftp_op)
+    {
+        globus_i_dsi_rest_gridftp_op_arg_t
+                                       *arg = read_part->data_read_callback_arg;
+
+        globus_mutex_destroy(&arg->mutex);
+        globus_cond_destroy(&arg->cond);
+        free(arg);
+        read_part->data_read_callback_arg = NULL;
+    }
+    else if (read_part->data_read_callback == globus_dsi_rest_read_multipart)
+    {
+        globus_i_dsi_rest_read_multipart_arg_t
+                                       *arg = read_part->data_read_callback_arg;
+
+        if (arg->parts != NULL)
+        {
+            for (size_t i = 0; i < arg->num_parts; i++)
+            {
+                globus_l_dsi_rest_request_cleanup_read_part(
+                        &arg->parts[i]);
+            }
+            free(arg->parts);
+            arg->parts = NULL;
+            arg->num_parts = 0;
+        }
+
+        free(arg->boundary);
+        arg->boundary = NULL;
+
+        free(arg->boundary_buffer);
+        arg->boundary_buffer = NULL;
+
+        free(arg);
+
+        read_part->data_read_callback_arg = NULL;
+    }
+}
+/* globus_l_dsi_rest_request_cleanup_read_part() */

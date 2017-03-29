@@ -16,7 +16,7 @@
 
 #ifndef GLOBUS_DONT_DOCUMENT_INTERNAL
 /**
- * @file write_multipart.c GridFTP DSI REST Write Single Block Callback
+ * @file write_multipart.c GridFTP DSI REST Write Multipart Callback
  */
 #endif
 
@@ -49,7 +49,8 @@ globus_l_dsi_rest_write_multipart(
     size_t                              buffer_length,
     size_t                             *amount_copied)
 {
-    globus_i_dsi_rest_multipart_arg_t  *state = write_callback_arg;
+    globus_i_dsi_rest_write_multipart_arg_t
+                                       *state = write_callback_arg;
     globus_result_t                     result = GLOBUS_SUCCESS;
     size_t                              this_copy = 0;
     size_t                              copied = 0;

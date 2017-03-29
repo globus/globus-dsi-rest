@@ -28,7 +28,8 @@ struct test_case
     char                               *method;
     char                               *uri_pattern;
     int                                 response_code;
-    globus_dsi_rest_multipart_arg_t     upload_parts;
+    globus_dsi_rest_write_multipart_arg_t
+                                        upload_parts;
     size_t                              server_read_offset;
 };
 
@@ -233,7 +234,7 @@ void *server_thread(void *arg)
                     sscanf(pct, "Content-Type: %26[^\r]", ct);
                     if (strcmp(ct, "text/plain") == 0)
                     {
-                        globus_dsi_rest_write_block_arg_t *block = test->upload_parts.part_writer_arg[i];
+                        globus_dsi_rest_write_block_arg_t *block = test->upload_parts.parts[i].data_write_callback_arg;
                         if (strncmp(p, block->block_data, q-p) != 0)
                         {
                             globus_xio_handle_cntl(
@@ -254,7 +255,7 @@ void *server_thread(void *arg)
                     else if (strcmp(ct, "application/json") == 0)
                     {
                         json_t *j = json_loadb(p, q-p, 0, NULL);
-                        if (!json_equal(j, test->upload_parts.part_writer_arg[i]))
+                        if (!json_equal(j, test->upload_parts.parts[i].data_write_callback_arg))
                         {
                             globus_xio_handle_cntl(
                                     xio_handle,
@@ -316,43 +317,44 @@ int main()
             .method = "PUT",
             .uri_pattern = "/write-multipart-test/put",
             .response_code = 204,
-            .upload_parts = (globus_dsi_rest_multipart_arg_t)
+            .upload_parts = (globus_dsi_rest_write_multipart_arg_t)
             {
                 .num_parts = 2,
-                .part_writer = (globus_dsi_rest_write_t[])
-                {
-                    globus_dsi_rest_write_json,
-                    globus_dsi_rest_write_block,
-                },
-                .part_writer_arg = (void *[])
-                {
-                    json_loads("[\"hello\", \"world\"]", 0, NULL),
-                    &(globus_dsi_rest_write_block_arg_t)
-                    {
-                        .block_data = "hello, world\n",
-                        .block_len = strlen("hello, world\n")
-                    },
-                },
-                .part_header = (globus_dsi_rest_key_array_t[])
+                .parts = (struct globus_dsi_rest_write_part_s[])
                 {
                     {
-                        .count = 1,
-                        .key_value = (globus_dsi_rest_key_value_t[])
+                        .data_write_callback = globus_dsi_rest_write_json,
+                        .data_write_callback_arg = json_loads(
+                            "[\"hello\", \"world\"]", 0, NULL),
+                        .part_header = (globus_dsi_rest_key_array_t)
                         {
+                            .count = 1,
+                            .key_value = (globus_dsi_rest_key_value_t[])
                             {
-                                .key = "Content-Type",
-                                .value = "application/json"
-                            }
+                                {
+                                    .key = "Content-Type",
+                                    .value = "application/json"
+                                }
+                            },
                         },
                     },
                     {
-                        .count = 1,
-                        .key_value = (globus_dsi_rest_key_value_t[])
+                        .data_write_callback = globus_dsi_rest_write_block,
+                        .data_write_callback_arg = &(globus_dsi_rest_write_block_arg_t)
                         {
+                            .block_data = "hello, world\n",
+                            .block_len = strlen("hello, world\n")
+                        },
+                        .part_header = (globus_dsi_rest_key_array_t)
+                        {
+                            .count = 1,
+                            .key_value = (globus_dsi_rest_key_value_t[])
                             {
-                                .key = "Content-Type",
-                                .value = "text/plain"
-                            }
+                                {
+                                    .key = "Content-Type",
+                                    .value = "text/plain"
+                                }
+                            },
                         },
                     },
                 }

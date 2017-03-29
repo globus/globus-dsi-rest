@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2016 University of Chicago
+ * Copyright 1999-2017 University of Chicago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,15 @@ globus_l_dsi_rest_write_block(
     size_t                              buffer_length,
     size_t                             *amount_copied)
 {
-    globus_dsi_rest_write_block_arg_t  *block = write_callback_arg;
-    char                               *data = block->block_data;
-    size_t                              amt = block->block_len;
+    globus_i_dsi_rest_write_block_arg_t*block = write_callback_arg;
+    char                               *data = NULL;
+    size_t                              amt = 0;
     globus_result_t                     result = GLOBUS_SUCCESS;
 
     GlobusDsiRestEnter();
+
+    data = block->block_data + block->offset;
+    amt = block->block_len - block->offset;
 
     if (amt > buffer_length)
     {
@@ -43,10 +46,8 @@ globus_l_dsi_rest_write_block(
     }
     memcpy(buffer, data, amt);
 
-    block->block_data = data + amt;
-    block->block_len -= amt;
-
     *amount_copied = amt;
+    block->offset += amt;
 
     GlobusDsiRestExitResult(result);
 

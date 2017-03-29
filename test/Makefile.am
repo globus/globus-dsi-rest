@@ -10,6 +10,7 @@ check_PROGRAMS = \
 	handle-release-test \
 	progress-idle-timeout-test \
 	read-json-test \
+	read-multipart-test \
 	request-test \
 	response-test \
         retryable-test \
@@ -73,6 +74,9 @@ progress_idle_timeout_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 read_json_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 read_json_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
+
+read_multipart_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
+read_multipart_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 request_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 request_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)

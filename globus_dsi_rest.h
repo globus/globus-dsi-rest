@@ -531,27 +531,32 @@ extern globus_dsi_rest_write_t const    globus_dsi_rest_write_gridftp_op;
  *     to globus_dsi_rest_request().
  */
 typedef
-struct globus_dsi_rest_multipart_arg_s
+struct globus_dsi_rest_write_multipart_arg_s
 {
     /** Number of parts for the multipart message */
     size_t                              num_parts;
-    /** Array of num_parts elements, each containing a globus_dsi_rest_write_t
-     * function pointer to write the data for that part.
-     */
-    globus_dsi_rest_write_t            *part_writer;
-    /** Array of num_parts elements, each containing an argument to pass
-     * to the corresponding part_writer callback
-     * function pointer
-     */
-    void                              **part_writer_arg;
-    /**
-     * Array of num_parts elements, each containing a set of headers to add to
-     * the beginning of the part message. Any element in the array 
-     * may contain an empty set of headers.
-     */
-    globus_dsi_rest_key_array_t        *part_header;
+
+    struct globus_dsi_rest_write_part_s
+    {
+        /**
+         * A globus_dsi_rest_write_t function pointer to write the data for
+         * this part.
+         */
+        globus_dsi_rest_write_t         data_write_callback;
+        /**
+         * An argument to pass to the data_write_callback
+         * function pointer
+         */
+        void                           *data_write_callback_arg;
+        /**
+         * Array of num_parts elements, each containing a set of headers to add
+         * to the beginning of the part message. Any element in the array may
+         * contain an empty set of headers.
+         */
+        globus_dsi_rest_key_array_t     part_header;
+    } *parts;
 }
-globus_dsi_rest_multipart_arg_t;
+globus_dsi_rest_write_multipart_arg_t;
 
 /**
  * @brief Multipart write specialization of globus_dsi_rest_write_t
@@ -562,7 +567,7 @@ globus_dsi_rest_multipart_arg_t;
  *     to the REST server is multipart message.
  *
  *     The write_callback_arg used with this function
- *     <b>MUST BE</b> a pointer to a globus_dsi_rest_multipart_arg_t.
+ *     <b>MUST BE</b> a pointer to a globus_dsi_rest_write_multipart_arg_t.
  *
  *     If the headers for the message contain a Content-Type
  *     type that is a multipart type, then the header is scanned for a boundary.
@@ -589,6 +594,64 @@ globus_dsi_rest_multipart_arg_t;
  *     specializations into a multipart message.
  */
 extern globus_dsi_rest_write_t const    globus_dsi_rest_write_multipart;
+
+/**
+ * @brief Multipart write specialization data_read_callback_arg
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     A pointer to a data structure of this type must be be used as the
+ *     data_read_callback_arg parameter when using the
+ *     globus_dsi_rest_read_multipart() function as the data_read_callback
+ *     to globus_dsi_rest_request().
+ */
+typedef
+struct globus_dsi_rest_read_multipart_arg_s
+{
+    /** Number of parts for the multipart message */
+    size_t                              num_parts;
+
+    struct globus_dsi_rest_read_part_s
+    {
+        /**
+         * An (optional) pointer to a function to call with the
+         * headers for this part. The code passed to this will be 0,
+         * and the status will be NULL.
+         */
+        globus_dsi_rest_response_t      response_callback;
+        /**
+         * An argument to pass to the response_callback
+         * funciton pointer. This may be NULL.
+         */
+        void                           *response_callback_arg;
+        /**
+         * A globus_dsi_rest_read_t function pointer to read the data for this
+         * part.
+         */
+        globus_dsi_rest_read_t          data_read_callback;
+        /**
+         * An argument to pass to the data_read_callback 
+         * function pointer. This may be NULL.
+         */
+        void                           *data_read_callback_arg;
+    } *parts;
+}
+globus_dsi_rest_read_multipart_arg_t;
+
+/**
+ * @brief Multipart read specialization of globus_dsi_rest_read_t
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     This function implements the globus_dsi_rest_read_t interface
+ *     and is intended to be used in the situation when the data to receive
+ *     from the REST server is a multipart message.
+ *
+ *     The read_callback_arg passed to this function <b>MUST BE</b> a
+ *     globus_dsi_rest_read_multipart_arg_t * cast to a void *. This function
+ *     will cause the request to fail if the Content-Type of the response does
+ *     not start with "multipart/".
+ */
+extern globus_dsi_rest_read_t const     globus_dsi_rest_read_multipart;
+
 /**
  * @brief JSON read specialization of globus_dsi_rest_read_t
  * @ingroup globus_dsi_rest_callback_specializations

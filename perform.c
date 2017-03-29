@@ -103,10 +103,10 @@ globus_l_dsi_rest_perform(
 
         goto perform_fail;
     }
-    if (request->data_read_callback != NULL)
+    if (request->read_part.data_read_callback != NULL)
     {
-        result = request->data_read_callback(
-                request->data_read_callback_arg,
+        result = request->read_part.data_read_callback(
+                request->read_part.data_read_callback_arg,
                 "",
                 0);
     }

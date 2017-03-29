@@ -225,8 +225,8 @@ void *server_thread(void *arg)
             globus_xio_http_version_t   http_version = 0;
             globus_hashtable_t          headers = NULL;
             globus_size_t               nbytes = 0;
-            unsigned char               upbuf[128];
-            unsigned char               downbuf[128];
+            unsigned char               upbuf[4096];
+            unsigned char               downbuf[4096];
             size_t                      downbytes = 0;
             int                         response_code = 500;
             globus_size_t               read_total = 0;

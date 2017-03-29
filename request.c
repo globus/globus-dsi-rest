@@ -25,7 +25,7 @@
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_callbacks(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     const globus_dsi_rest_key_array_t  *headers,
     globus_dsi_rest_write_t             data_write_callback,
     void                               *data_write_callback_arg);
@@ -33,32 +33,58 @@ globus_l_dsi_rest_prepare_write_callbacks(
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_multipart_callback(
-    globus_i_dsi_rest_part_t           *current_part,
-    globus_dsi_rest_multipart_arg_t    *parts);
-
+    globus_i_dsi_rest_write_part_t     *current_part,
+    globus_dsi_rest_write_multipart_arg_t
+                                       *parts);
 
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_json_callback(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     json_t                             *json);
 
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_form_callback(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     globus_dsi_rest_key_array_t        *form);
 
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_gridftp_op_callback(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg);
 
 static
 globus_result_t
+globus_l_dsi_rest_prepare_read_callbacks(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    globus_dsi_rest_read_t              data_read_callback,
+    void *                              data_read_callback_arg);
+
+static
+globus_result_t
+globus_l_dsi_rest_prepare_read_json_callback(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    json_t                            **jsonp);
+
+static
+globus_result_t
+globus_l_dsi_rest_prepare_read_gridftp_op(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg);
+
+static
+globus_result_t
+globus_l_dsi_rest_prepare_read_multipart(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    globus_dsi_rest_read_multipart_arg_t
+                                       *multipart_arg);
+
+static
+globus_result_t
 globus_l_dsi_rest_add_part_header(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     const char                         *key,
     const char                         *value);
 
@@ -99,8 +125,6 @@ globus_dsi_rest_request(
     *request = (globus_i_dsi_rest_request_t)
     {
         .method                       = method,
-        .data_read_callback           = callbacks->data_read_callback,
-        .data_read_callback_arg       = callbacks->data_read_callback_arg,
         .response_callback            = callbacks->response_callback,
         .response_callback_arg        = callbacks->response_callback_arg,
         .complete_callback            = callbacks->complete_callback,
@@ -119,55 +143,16 @@ globus_dsi_rest_request(
         goto prepare_write_fail;
     }
 
-    if (callbacks->data_read_callback == globus_dsi_rest_read_json)
-    {
-       request->read_json_arg = (globus_i_dsi_rest_read_json_arg_t)
-       {
-           .json_out = callbacks->data_read_callback_arg
-       };
-       request->data_read_callback_arg = &request->read_json_arg;
-    }
-    else if (callbacks->data_read_callback == globus_dsi_rest_read_gridftp_op)
-    {
-        int rc = 0;
-        globus_dsi_rest_gridftp_op_arg_t
-                                       *gridftp_op_arg = callbacks->data_read_callback_arg;
+    result = globus_l_dsi_rest_prepare_read_callbacks(
+        &request->read_part,
+        callbacks->data_read_callback,
+        callbacks->data_read_callback_arg);
 
-        GlobusDsiRestDebug(
-                "data_read_callback=globus_dsi_rest_read_gridftp_op"
-                " gridftp_op=%p"
-                " offset=%"GLOBUS_OFF_T_FORMAT
-                " length=%"GLOBUS_OFF_T_FORMAT"\n",
-                (void *) gridftp_op_arg->op,
-                gridftp_op_arg->offset,
-                gridftp_op_arg->length);
-        
-        request->read_gridftp_op_arg = (globus_i_dsi_rest_gridftp_op_arg_t)
-        {
-            .op = gridftp_op_arg->op,
-            .pending_buffers_last = &request->read_gridftp_op_arg.pending_buffers,
-            .offset = gridftp_op_arg->offset,
-        };
-        if (gridftp_op_arg->length != (globus_off_t) -1)
-        {
-            request->read_gridftp_op_arg.end_offset =
-                    request->read_gridftp_op_arg.offset
-                    + gridftp_op_arg->length;
-        }
-        rc = globus_mutex_init(&request->read_gridftp_op_arg.mutex, NULL);
-        if (rc != GLOBUS_SUCCESS)
-        {
-            result = GlobusDsiRestErrorThreadFail(rc);
-            goto mutex_init_fail;
-        }
-        rc = globus_cond_init(&request->read_gridftp_op_arg.cond, NULL);
-        if (rc != GLOBUS_SUCCESS)
-        {
-            result = GlobusDsiRestErrorThreadFail(rc);
-            goto cond_init_fail;
-        }
-        request->data_read_callback_arg = &request->read_gridftp_op_arg;
+    if (result != GLOBUS_SUCCESS)
+    {
+        goto prepare_read_fail;
     }
+
     if (callbacks->progress_callback == globus_dsi_rest_progress_idle_timeout)
     {
         request->idle_arg = (globus_i_dsi_rest_idle_arg_t)
@@ -242,8 +227,7 @@ invalid_method:
 invalid_headers:
 invalid_uri:
 no_handle:
-cond_init_fail:
-mutex_init_fail:
+prepare_read_fail:
 prepare_write_fail:
         globus_i_dsi_rest_request_cleanup(request);
     }
@@ -257,7 +241,7 @@ bad_params:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_callbacks(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     const globus_dsi_rest_key_array_t  *headers,
     globus_dsi_rest_write_t             data_write_callback,
     void                               *data_write_callback_arg)
@@ -298,14 +282,22 @@ globus_l_dsi_rest_prepare_write_callbacks(
     }
     else if (data_write_callback == globus_dsi_rest_write_block)
     {
+        globus_dsi_rest_write_block_arg_t
+                                       *arg = data_write_callback_arg;
+        globus_i_dsi_rest_write_block_arg_t
+                                       *copied_arg = NULL;
+
         /* We pass a copy of the original arg to the callback so we can
          * track buffer offsets
          */
-        current_part->write_block_callback_arg
-                = *(globus_dsi_rest_write_block_arg_t *)
-                data_write_callback_arg;
-        current_part->data_write_callback_arg =
-                &current_part->write_block_callback_arg;
+        copied_arg = malloc(sizeof(globus_i_dsi_rest_write_block_arg_t));
+        *copied_arg = (globus_i_dsi_rest_write_block_arg_t)
+        {
+            .block_data = arg->block_data,
+            .block_len = arg->block_len,
+            .offset = 0,
+        };
+        current_part->data_write_callback_arg = copied_arg;
     }
     else if (data_write_callback == globus_dsi_rest_write_json)
     {
@@ -340,22 +332,27 @@ headers_alloc_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_multipart_callback(
-    globus_i_dsi_rest_part_t           *current_part,
-    globus_dsi_rest_multipart_arg_t    *parts)
+    globus_i_dsi_rest_write_part_t     *current_part,
+    globus_dsi_rest_write_multipart_arg_t
+                                       *parts)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
-    globus_i_dsi_rest_multipart_arg_t  *multipart_write_arg = NULL;
+    globus_i_dsi_rest_write_multipart_arg_t  
+                                       *multipart_write_arg = NULL;
     const char                         *content_type_header = NULL;
 
-    current_part->multipart_write_arg = (globus_i_dsi_rest_multipart_arg_t)
+    multipart_write_arg = malloc(
+        sizeof(globus_i_dsi_rest_write_multipart_arg_t));
+
+    *multipart_write_arg = (globus_i_dsi_rest_write_multipart_arg_t)
     {
         .num_parts = parts->num_parts
     };
-    multipart_write_arg = &current_part->multipart_write_arg;
 
     current_part->data_write_callback_arg = multipart_write_arg;
 
-    /* If a Content-Type header is present, and it's a multipart MIME type
+    /*
+     * If a Content-Type header is present, and it's a multipart MIME type
      * we'll copy the boundary from the header and use it.
      *
      * If it's present but not a multipart header, we'll concatenate the
@@ -422,15 +419,15 @@ globus_l_dsi_rest_prepare_write_multipart_callback(
      * Recursively add parts to the multipart_write_arg
      */
     multipart_write_arg->parts = calloc(
-            parts->num_parts, sizeof(globus_i_dsi_rest_part_t));
+            parts->num_parts, sizeof(globus_i_dsi_rest_write_part_t));
 
     for (size_t i = 0; i < parts->num_parts; i++)
     {
         result = globus_l_dsi_rest_prepare_write_callbacks(
                 &multipart_write_arg->parts[i],
-                &parts->part_header[i],
-                parts->part_writer[i],
-                parts->part_writer_arg[i]);
+                &parts->parts[i].part_header,
+                parts->parts[i].data_write_callback,
+                parts->parts[i].data_write_callback_arg);
         if (result != GLOBUS_SUCCESS)
         {
             goto part_prepare_fail;
@@ -463,11 +460,12 @@ boundary_malloc_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_json_callback(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     json_t                             *json)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
     char                               *jstring = NULL;
+    globus_i_dsi_rest_write_block_arg_t*block_arg = NULL;
 
     GlobusDsiRestEnter();
     /*
@@ -482,15 +480,14 @@ globus_l_dsi_rest_prepare_write_json_callback(
         result = GlobusDsiRestErrorMemory();
         goto json_encode_fail;
     }
-    current_part->write_block_callback_arg =
-    current_part->write_block_callback_arg_orig =
-    (globus_dsi_rest_write_block_arg_t)
+    block_arg = malloc(sizeof(globus_i_dsi_rest_write_block_arg_t));
+    *block_arg = (globus_i_dsi_rest_write_block_arg_t)
     {
         .block_data = jstring,
-        .block_len = strlen(jstring)
+        .block_len = strlen(jstring),
+        .offset = 0,
     };
-    current_part->data_write_callback_arg =
-            &current_part->write_block_callback_arg;
+    current_part->data_write_callback_arg = block_arg;
     result = globus_l_dsi_rest_add_part_header(
             current_part,
             strdup("Content-Type"),
@@ -505,11 +502,12 @@ json_encode_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_form_callback(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     globus_dsi_rest_key_array_t        *form)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
     char                               *form_data = NULL;
+    globus_i_dsi_rest_write_block_arg_t*block_arg = NULL;
 
     GlobusDsiRestEnter();
     /*
@@ -524,15 +522,16 @@ globus_l_dsi_rest_prepare_write_form_callback(
     {
         goto form_encode_fail;
     }
-    current_part->write_block_callback_arg =
-    current_part->write_block_callback_arg_orig =
-    (globus_dsi_rest_write_block_arg_t)
+    block_arg = malloc(sizeof(globus_i_dsi_rest_write_block_arg_t));
+
+    *block_arg = (globus_i_dsi_rest_write_block_arg_t)
     {
         .block_data = form_data,
-        .block_len = strlen(form_data)
+        .block_len = strlen(form_data),
+        .offset = 0,
     };
-    current_part->data_write_callback_arg =
-            &current_part->write_block_callback_arg;
+
+    current_part->data_write_callback_arg = block_arg;
 
     result = globus_l_dsi_rest_add_part_header(
             current_part,
@@ -548,10 +547,11 @@ form_encode_fail:
 static
 globus_result_t
 globus_l_dsi_rest_prepare_write_gridftp_op_callback(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg)
 {
     globus_result_t                     result = GLOBUS_SUCCESS;
+    globus_i_dsi_rest_gridftp_op_arg_t *arg = NULL;
     int                                 rc = 0;
 
     GlobusDsiRestEnter();
@@ -565,30 +565,30 @@ globus_l_dsi_rest_prepare_write_gridftp_op_callback(
             gridftp_op_arg->offset,
             gridftp_op_arg->length);
 
-    current_part->gridftp_op_arg = (globus_i_dsi_rest_gridftp_op_arg_t)
+    arg = malloc(sizeof(globus_i_dsi_rest_gridftp_op_arg_t));
+
+    *arg = (globus_i_dsi_rest_gridftp_op_arg_t)
     {
         .op = gridftp_op_arg->op,
-        .pending_buffers_last = &current_part->gridftp_op_arg.pending_buffers,
+        .pending_buffers_last = &arg->pending_buffers,
         .offset = gridftp_op_arg->offset,
         .eofp = &gridftp_op_arg->eof
     };
     if (gridftp_op_arg->length != (globus_off_t) -1)
     {
-        current_part->gridftp_op_arg.end_offset =
-                current_part->gridftp_op_arg.offset 
-                + gridftp_op_arg->length;
+        arg->end_offset = arg->offset + gridftp_op_arg->length;
     }
     else
     {
-        current_part->gridftp_op_arg.end_offset = (globus_off_t) -1;
+        arg->end_offset = (globus_off_t) -1;
     }
-    rc = globus_mutex_init(&current_part->gridftp_op_arg.mutex, NULL);
+    rc = globus_mutex_init(&arg->mutex, NULL);
     if (rc != GLOBUS_SUCCESS)
     {
         result = GlobusDsiRestErrorThreadFail(rc);
         goto write_mutex_init_fail;
     }
-    rc = globus_cond_init(&current_part->gridftp_op_arg.cond, NULL);
+    rc = globus_cond_init(&arg->cond, NULL);
     if (rc != GLOBUS_SUCCESS)
     {
         result = GlobusDsiRestErrorThreadFail(rc);
@@ -596,12 +596,12 @@ globus_l_dsi_rest_prepare_write_gridftp_op_callback(
     }
 
     current_part->data_write_callback = globus_dsi_rest_write_gridftp_op;
-    current_part->data_write_callback_arg = &current_part->gridftp_op_arg;
+    current_part->data_write_callback_arg = arg;
 
     if (result != GLOBUS_SUCCESS)
     {
 write_cond_init_fail:
-        globus_mutex_destroy(&current_part->gridftp_op_arg.mutex);
+        globus_mutex_destroy(&arg->mutex);
     }
     
 write_mutex_init_fail:
@@ -614,8 +614,225 @@ write_mutex_init_fail:
 
 static
 globus_result_t
+globus_l_dsi_rest_prepare_read_callbacks(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    globus_dsi_rest_read_t              data_read_callback,
+    void *                              data_read_callback_arg)
+{
+    globus_result_t                     result = GLOBUS_SUCCESS;
+
+    GlobusDsiRestEnter();
+
+    current_part->data_read_callback = data_read_callback;
+    current_part->data_read_callback_arg = data_read_callback_arg;
+    current_part->headers = (globus_dsi_rest_key_array_t)
+    {
+        .count = 0,
+    };
+
+    /*
+     * For the predefined read callbacks, we use internal data structures for
+     * callback arguments that we create here.
+     */
+    if (data_read_callback == globus_dsi_rest_read_json)
+    {
+        result = globus_l_dsi_rest_prepare_read_json_callback(
+            current_part,
+            data_read_callback_arg);
+    }
+    else if (data_read_callback == globus_dsi_rest_read_gridftp_op)
+    {
+        result = globus_l_dsi_rest_prepare_read_gridftp_op(
+            current_part,
+            data_read_callback_arg);
+    }
+    else if (data_read_callback == globus_dsi_rest_read_multipart)
+    {
+        result = globus_l_dsi_rest_prepare_read_multipart(
+            current_part,
+            data_read_callback_arg);
+    }
+
+    if (result != GLOBUS_SUCCESS)
+    {
+        free(current_part->headers.key_value);
+    }
+    GlobusDsiRestExitResult(result);
+
+    return result;
+}
+
+static
+globus_result_t
+globus_l_dsi_rest_prepare_read_json_callback(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    json_t                            **jsonp)
+{
+    globus_i_dsi_rest_read_json_arg_t  *json_arg = NULL;
+    globus_result_t                     result = GLOBUS_SUCCESS;
+
+    GlobusDsiRestEnter();
+
+    json_arg = malloc(sizeof(globus_i_dsi_rest_read_json_arg_t));
+
+    if (json_arg == NULL)
+    {
+        result = GlobusDsiRestErrorMemory();
+
+        goto malloc_json_arg_fail;
+    }
+
+    *json_arg = (globus_i_dsi_rest_read_json_arg_t)
+    {
+        .json_out = jsonp,
+    };
+
+malloc_json_arg_fail:
+    current_part->data_read_callback_arg = json_arg;
+
+    GlobusDsiRestExitResult(result);
+    return result;
+}
+/* globus_l_dsi_rest_prepare_read_json_callback() */
+
+static
+globus_result_t
+globus_l_dsi_rest_prepare_read_gridftp_op(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    globus_dsi_rest_gridftp_op_arg_t   *gridftp_op_arg)
+{
+    int                                 rc = 0;
+    globus_result_t                     result = GLOBUS_SUCCESS;
+    globus_i_dsi_rest_gridftp_op_arg_t *wrapped_arg = NULL;
+
+    GlobusDsiRestEnter();
+
+    GlobusDsiRestDebug(
+            "data_read_callback=globus_dsi_rest_read_gridftp_op"
+            " gridftp_op=%p"
+            " offset=%"GLOBUS_OFF_T_FORMAT
+            " length=%"GLOBUS_OFF_T_FORMAT"\n",
+            (void *) gridftp_op_arg->op,
+            gridftp_op_arg->offset,
+            gridftp_op_arg->length);
+    
+    wrapped_arg = malloc(sizeof(globus_i_dsi_rest_gridftp_op_arg_t));
+    if (wrapped_arg == NULL)
+    {
+        result = GlobusDsiRestErrorMemory();
+
+        goto malloc_arg_fail;
+    }
+    *wrapped_arg = (globus_i_dsi_rest_gridftp_op_arg_t)
+    {
+        .op = gridftp_op_arg->op,
+        .pending_buffers_last = &wrapped_arg->pending_buffers,
+        .offset = gridftp_op_arg->offset,
+    };
+    if (gridftp_op_arg->length != (globus_off_t) -1)
+    {
+        wrapped_arg->end_offset = wrapped_arg->offset
+            + gridftp_op_arg->length;
+    }
+    rc = globus_mutex_init(&wrapped_arg->mutex, NULL);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        result = GlobusDsiRestErrorThreadFail(rc);
+        goto mutex_init_fail;
+    }
+    rc = globus_cond_init(&wrapped_arg->cond, NULL);
+    if (rc != GLOBUS_SUCCESS)
+    {
+        result = GlobusDsiRestErrorThreadFail(rc);
+        goto cond_init_fail;
+    }
+
+    if (result != GLOBUS_SUCCESS)
+    {
+cond_init_fail:
+        globus_mutex_destroy(&wrapped_arg->mutex);
+mutex_init_fail:
+        free(wrapped_arg);
+malloc_arg_fail:
+        wrapped_arg = NULL;
+    }
+
+    current_part->data_read_callback_arg = wrapped_arg;
+
+    GlobusDsiRestExitResult(result);
+    return result;
+}
+/* globus_l_dsi_rest_prepare_read_gridftp_op() */
+
+static
+globus_result_t
+globus_l_dsi_rest_prepare_read_multipart(
+    globus_i_dsi_rest_read_part_t      *current_part,
+    globus_dsi_rest_read_multipart_arg_t
+                                       *multipart_arg)
+{
+    globus_result_t                     result = GLOBUS_SUCCESS;
+    globus_i_dsi_rest_read_multipart_arg_t
+                                       *arg = NULL;
+
+    GlobusDsiRestDebug(
+            "data_read_callback=globus_dsi_rest_multipart"
+            " num_parts=%zu\n",
+            multipart_arg->num_parts);
+
+    arg = malloc(sizeof(globus_i_dsi_rest_read_multipart_arg_t));
+    if (arg == NULL)
+    {
+        result = GlobusDsiRestErrorMemory();
+
+        goto arg_alloc_fail;
+    }
+
+    *arg = (globus_i_dsi_rest_read_multipart_arg_t)
+    {
+        .num_parts = multipart_arg->num_parts,
+        .part_index = (size_t) -1,
+        .parts = calloc(
+            sizeof(globus_i_dsi_rest_read_part_t),
+            multipart_arg->num_parts),
+    };
+
+    if (arg->parts == NULL)
+    {
+        result = GlobusDsiRestErrorMemory();
+        goto parts_alloc_fail;
+    }
+
+    for (size_t i = 0; i < multipart_arg->num_parts; i++)
+    {
+        arg->parts[i].response_callback =
+            multipart_arg->parts[i].response_callback;
+        arg->parts[i].response_callback_arg =
+            multipart_arg->parts[i].response_callback_arg;
+        result = globus_l_dsi_rest_prepare_read_callbacks(
+            &arg->parts[i],
+            multipart_arg->parts[i].data_read_callback,
+            multipart_arg->parts[i].data_read_callback_arg);
+        if (result != GLOBUS_SUCCESS)
+        {
+            goto parts_prepare_fail;
+        }
+    }
+
+parts_prepare_fail:
+parts_alloc_fail:
+arg_alloc_fail:
+    current_part->data_read_callback_arg = arg;
+    
+    GlobusDsiRestExitResult(result);
+    return result;
+}
+/* globus_l_dsi_rest_prepare_read_multipart() */
+
+static
+globus_result_t
 globus_l_dsi_rest_add_part_header(
-    globus_i_dsi_rest_part_t           *current_part,
+    globus_i_dsi_rest_write_part_t     *current_part,
     const char                         *key,
     const char                         *value)
 {

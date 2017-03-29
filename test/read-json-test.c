@@ -146,6 +146,13 @@ int main()
             {
                 ok = transport_ok = false;
             }
+            else
+            {
+                char *errstr = globus_error_print_friendly(
+                    globus_error_peek(result));
+                printf("Non-json parse error: %s\n", errstr);
+                free(errstr);
+            }
         }
         else
         {
