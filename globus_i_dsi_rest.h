@@ -122,6 +122,15 @@ struct globus_i_dsi_rest_write_block_arg_s
 globus_i_dsi_rest_write_block_arg_t;
 
 typedef
+struct globus_i_dsi_rest_write_blocks_arg_s
+{
+    size_t                              block_count;
+    size_t                              current_block;
+    globus_i_dsi_rest_write_block_arg_t*blocks;
+}
+globus_i_dsi_rest_write_blocks_arg_t;
+
+typedef
 struct globus_i_dsi_rest_write_part_s
 {
     globus_dsi_rest_key_array_t         headers;

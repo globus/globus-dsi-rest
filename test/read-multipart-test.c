@@ -71,7 +71,7 @@ request_test_handler(
 
 int main()
 {
-    globus_result_t                     result;
+    globus_result_t                     result = GLOBUS_SUCCESS;
     char                               *contact_string = NULL;
     char                               *uri = NULL;
     json_t                             *json1 = NULL, *json2 = NULL;
@@ -90,13 +90,30 @@ int main()
     globus_module_activate(GLOBUS_DSI_REST_MODULE);
 
     result = globus_dsi_rest_test_server_init(&contact_string);
+    if (result != GLOBUS_SUCCESS)
+    {
+        rc = 99;
+        goto error;
+    }
 
     result = globus_dsi_rest_test_server_add_route(
         "/multipart",
         request_test_handler,
         NULL);
+    if (result != GLOBUS_SUCCESS)
+    {
+        rc = 99;
+        goto error;
+    }
 
     uri = globus_common_create_string("http://%s/multipart", contact_string);
+
+    if (uri == NULL)
+    {
+        rc = 99;
+        perror("globus_common_create_string");
+        goto error;
+    }
 
     response_arg_1.desired_headers = (globus_dsi_rest_key_array_t)
     {
@@ -142,11 +159,17 @@ int main()
                 }
             },
         });
+    if (result != GLOBUS_SUCCESS)
+    {
+        goto error;
+        rc = 1;
+    }
 
     jstring1 = json_dumps(json1, JSON_COMPACT);
     if (strcmp(jstring1, "{\"one\":1}") != 0)
     {
         fprintf(stderr, "# json %s doesn't match {\"one\":1}\n", jstring1);
+        goto error;
         rc = 1;
     }
     free(jstring1);
@@ -163,6 +186,7 @@ int main()
             response_arg_1.desired_headers.key_value[0].value,
             "response-1");
         rc = 1;
+        goto error;
     }
 
     free((char *) response_arg_1.desired_headers.key_value[0].value);
@@ -172,6 +196,7 @@ int main()
     {
         fprintf(stderr, "# json %s doesn't match [1,2,3]\n", jstring2);
         rc = 1;
+        goto error;
     }
     free(jstring2);
     json_decref(json2);
@@ -186,6 +211,7 @@ int main()
             response_arg_2.desired_headers.key_value[0].value,
             "response-2");
         rc = 1;
+        goto error;
     }
     free((char *) response_arg_2.desired_headers.key_value[0].value);
 
@@ -195,6 +221,19 @@ int main()
     globus_module_deactivate_all();
     curl_global_cleanup();
 
+error:
     printf("%s\n", rc == 0 ? "ok" :  "not ok");
+    if (result != GLOBUS_SUCCESS)
+    {
+        char                           *errstr = NULL;
+
+        errstr = globus_error_print_friendly(globus_error_peek(result));
+
+        if (errstr != NULL)
+        {
+            fprintf(stderr, "Error: %s\n", errstr);
+            free(errstr);
+        }
+    }
     return rc;
 }

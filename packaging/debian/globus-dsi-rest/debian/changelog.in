@@ -1,3 +1,11 @@
+globus-dsi-rest (0.29-1+gt6.@distro@) @distro@; urgency=low
+
+  * Thu Apr 13 2017 Globus Toolkit <support@globus.org> - 0.29-1
+  * Add multiple-block data writer
+  * Fix documentation typos
+
+ Globus Toolkit <support@globus.org>  Thu, Apr 13 2017 11:06:25 -0400
+
 globus-dsi-rest (0.28-1+gt6.@distro@) @distro@; urgency=low
 
   * Add multipart reader

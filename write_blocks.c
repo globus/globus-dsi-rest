@@ -24,36 +24,51 @@
 
 static
 globus_result_t
-globus_l_dsi_rest_write_block(
+globus_l_dsi_rest_write_blocks(
     void                               *write_callback_arg,
     void                               *buffer,
     size_t                              buffer_length,
     size_t                             *amount_copied)
 {
-    globus_i_dsi_rest_write_block_arg_t*block = write_callback_arg;
+    globus_i_dsi_rest_write_blocks_arg_t
+                                       *blocks = write_callback_arg;
     char                               *data = NULL;
     size_t                              amt = 0;
+    size_t                              amt_copied = 0;
     globus_result_t                     result = GLOBUS_SUCCESS;
 
     GlobusDsiRestEnter();
 
-    data = (char *) block->block_data + block->offset;
-    amt = block->block_len - block->offset;
-
-    if (amt > buffer_length)
+    while (blocks->current_block < blocks->block_count
+        && amt_copied < buffer_length)
     {
-        amt = buffer_length;
-    }
-    memcpy(buffer, data, amt);
+        globus_i_dsi_rest_write_block_arg_t*block = 
+            &blocks->blocks[blocks->current_block];
 
-    *amount_copied = amt;
-    block->offset += amt;
+        data = (char *) block->block_data + block->offset;
+        amt = block->block_len - block->offset;
+
+        if (amt > buffer_length)
+        {
+            amt = buffer_length;
+        }
+        memcpy((char *)buffer + amt_copied, data, amt);
+
+        amt_copied += amt;
+        block->offset += amt;
+
+        if (block->offset == block->block_len)
+        {
+            blocks->current_block++;
+        }
+    }
 
     GlobusDsiRestExitResult(result);
+    *amount_copied = amt_copied;
 
     return result;
 }
-/* globus_l_dsi_rest_write_block() */
+/* globus_l_dsi_rest_write_blocks() */
 
-globus_dsi_rest_write_t const           globus_dsi_rest_write_block
-                                      = globus_l_dsi_rest_write_block;
+globus_dsi_rest_write_t const           globus_dsi_rest_write_blocks
+                                      = globus_l_dsi_rest_write_blocks;

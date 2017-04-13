@@ -26,7 +26,8 @@ struct test_case
     char                               *method;
     char                               *uri_pattern;
     int                                 response_code;
-    char                               *upload_body;
+    char                               *upload_body1;
+    char                               *upload_body2;
     char                               *download_body;
     size_t                              client_read_offset;
     size_t                              client_write_offset;
@@ -39,7 +40,8 @@ struct test_case                        tests[] =
         .method = "PUT",
         .uri_pattern = "/write-block-test/put",
         .response_code = 204,
-        .upload_body = "data",
+        .upload_body1 = "data1",
+        .upload_body2 = "data2",
     },
 };
 
@@ -73,11 +75,13 @@ request_test_handler(
     globus_dsi_rest_key_array_t        *headers)
 {
     struct test_case                   *test = route_arg;
+    size_t                              body1_len = strlen(test->upload_body1);
+    size_t                              body2_len = strlen(test->upload_body2);
     globus_result_t                     result = GLOBUS_SUCCESS;
 
-    if (test->upload_body != NULL
-        && (strlen(test->upload_body) != request_body_length
-        || memcmp(test->upload_body, request_body, request_body_length) != 0))
+    if ((request_body_length != (body1_len + body2_len))
+        || memcmp(request_body, test->upload_body1, body1_len) != 0
+        || memcmp((char *)request_body + body1_len, test->upload_body2, body2_len) != 0)
     {
         result = GLOBUS_FAILURE;
     }
@@ -142,13 +146,22 @@ int main()
             &headers,
             &(globus_dsi_rest_callbacks_t)
             {
-                .data_write_callback = tests[i].upload_body? globus_dsi_rest_write_block : NULL,
-                .data_write_callback_arg =
-                        &(globus_dsi_rest_write_block_arg_t)
+                .data_write_callback = globus_dsi_rest_write_blocks,
+                .data_write_callback_arg = &(globus_dsi_rest_write_blocks_arg_t)
+                {
+                    .blocks = (globus_dsi_rest_write_block_arg_t[])
+                    {
                         {
-                            .block_data = tests[i].upload_body,
-                            .block_len = tests[i].upload_body?strlen(tests[i].upload_body):0,
+                            .block_data = tests[i].upload_body1,
+                            .block_len = strlen(tests[i].upload_body1),
                         },
+                        {
+                            .block_data = tests[i].upload_body2,
+                            .block_len = strlen(tests[i].upload_body2),
+                        },
+                    },
+                    .block_count=2,
+                },
                 .response_callback = response_callback,
                 .response_callback_arg = &tests[i]
             });

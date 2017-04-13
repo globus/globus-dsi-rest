@@ -16,6 +16,7 @@ check_PROGRAMS = \
         retryable-test \
 	set-request-test \
 	write-block-test \
+	write-blocks-test \
 	write-form-test \
 	write-json-test \
 	write-multipart-test \
@@ -89,6 +90,9 @@ retryable_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 write_block_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 write_block_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
+
+write_blocks_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
+write_blocks_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
 write_form_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 write_form_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)

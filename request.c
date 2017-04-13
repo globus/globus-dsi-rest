@@ -299,6 +299,40 @@ globus_l_dsi_rest_prepare_write_callbacks(
         };
         current_part->data_write_callback_arg = copied_arg;
     }
+    else if (data_write_callback == globus_dsi_rest_write_blocks)
+    {
+        globus_dsi_rest_write_blocks_arg_t
+                                       *arg = data_write_callback_arg;
+        globus_i_dsi_rest_write_blocks_arg_t
+                                       *copied_arg = NULL;
+        globus_i_dsi_rest_write_block_arg_t
+                                       *block_args = NULL;
+
+        /* We pass a copy of the original arg to the callback so we can
+         * track buffer offsets
+         */
+        block_args = calloc(
+            arg->block_count,
+            sizeof(globus_i_dsi_rest_write_block_arg_t));
+
+        for (size_t i = 0; i < arg->block_count; i++)
+        {
+            block_args[i] = (globus_i_dsi_rest_write_block_arg_t)
+            {
+                .block_data = arg->blocks[i].block_data,
+                .block_len = arg->blocks[i].block_len,
+                .offset = 0,
+            };
+        }
+        copied_arg = malloc(sizeof(globus_i_dsi_rest_write_blocks_arg_t));
+        *copied_arg = (globus_i_dsi_rest_write_blocks_arg_t)
+        {
+            .blocks = block_args,
+            .block_count = arg->block_count,
+            .current_block = 0,
+        };
+        current_part->data_write_callback_arg = copied_arg;
+    }
     else if (data_write_callback == globus_dsi_rest_write_json)
     {
         result = globus_l_dsi_rest_prepare_write_json_callback(
@@ -374,9 +408,21 @@ globus_l_dsi_rest_prepare_write_multipart_callback(
         {
             b += 9;
             c = b;
-            while (*c != 0 && !isspace(*c))
+            if (*c == '"')
             {
+                b++;
                 c++;
+                while (*c != 0 && *c != '"')
+                {
+                    c++;
+                }
+            }
+            else
+            {
+                while (*c != 0 && !isspace(*c))
+                {
+                    c++;
+                }
             }
             multipart_write_arg->boundary = malloc(c-b+1);
             if (multipart_write_arg->boundary == NULL)

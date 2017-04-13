@@ -463,6 +463,34 @@ extern globus_dsi_rest_write_t const    globus_dsi_rest_write_block;
 extern globus_dsi_rest_write_t const    globus_dsi_rest_write_json;
 
 /**
+ * @brief Multiple-block write specialization data_write_callback_arg
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     A pointer to a data structure of this type must be be used as the
+ *     data_write_callback_arg parameter when using the
+ *     globus_dsi_rest_write_blocks() function as the data_write_callback
+ *     to globus_dsi_rest_request().
+ */
+typedef struct
+{
+    globus_dsi_rest_write_block_arg_t  *blocks;
+    size_t                              block_count;
+}
+globus_dsi_rest_write_blocks_arg_t;
+/**
+ * @brief Multiple-block write specialization of the globus_dsi_rest_write_t
+ * @ingroup globus_dsi_rest_callback_specializations
+ * @details
+ *     This function implements the globus_dsi_rest_write_t interface
+ *     and is intended to be used in the situation where the data to send
+ *     to the REST server is contained in multiple data arrays.
+ *
+ *     The write_callback_arg used with this <b>MUST BE</b> a pointer to
+ *     a globus_dsi_rest_write_blocks_arg_t.
+ */
+extern globus_dsi_rest_write_t const    globus_dsi_rest_write_blocks;
+
+/**
  * @brief POST FORM write specialization of globus_dsi_rest_write_t
  * @ingroup globus_dsi_rest_callback_specializations
  * @details
@@ -470,8 +498,8 @@ extern globus_dsi_rest_write_t const    globus_dsi_rest_write_json;
  *     and is intended to be used in the situation when the data to send
  *     to the REST server is to be a application/x-www-form-urlencoded post body.
  *     
- *     The write_callback_arg used with this function <b>MUST BE</b> a pointer to a 
- *     globus_dsi_rest_key_array_t.
+ *     The write_callback_arg used with this function <b>MUST BE</b> a pointer
+ *     to a globus_dsi_rest_key_array_t.
  */
 extern globus_dsi_rest_write_t const    globus_dsi_rest_write_form;
 
@@ -620,7 +648,7 @@ struct globus_dsi_rest_read_multipart_arg_s
         globus_dsi_rest_response_t      response_callback;
         /**
          * An argument to pass to the response_callback
-         * funciton pointer. This may be NULL.
+         * function pointer. This may be NULL.
          */
         void                           *response_callback_arg;
         /**

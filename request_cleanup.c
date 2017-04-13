@@ -81,6 +81,22 @@ globus_l_dsi_rest_request_cleanup_write_part(
         free(arg);
         part->data_write_callback_arg = NULL;
     }
+    else if (part->data_write_callback == globus_dsi_rest_write_block)
+    {
+        globus_i_dsi_rest_write_blocks_arg_t
+                                       *arg = part->data_write_callback_arg; 
+        free(arg);
+        part->data_write_callback_arg = NULL;
+    }
+    else if (part->data_write_callback == globus_dsi_rest_write_blocks)
+    {
+        globus_i_dsi_rest_write_blocks_arg_t
+                                       *arg = part->data_write_callback_arg; 
+        free(arg->blocks);
+        arg->blocks = NULL;
+        free(arg);
+        part->data_write_callback_arg = NULL;
+    }
     else if (part->data_write_callback == globus_dsi_rest_write_gridftp_op)
     {
         globus_i_dsi_rest_gridftp_op_arg_t 

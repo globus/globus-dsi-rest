@@ -51,6 +51,7 @@ libglobus_dsi_rest_la_SOURCES = \
 	uri_add_query.c \
 	uri_escape.c \
 	write_block.c \
+	write_blocks.c \
 	write_form.c \
 	write_data.c \
 	write_gridftp_op.c \
