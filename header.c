@@ -182,6 +182,7 @@ globus_i_dsi_rest_header(
 
                     read_multipart->boundary_length = strlen(
                         read_multipart->boundary);
+                    /* \r\n--boundary--\r\n\0 */
                     read_multipart->boundary_buffer_length = 
                         read_multipart->boundary_length + 9;
                     read_multipart->boundary_buffer = malloc(

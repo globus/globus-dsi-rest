@@ -209,18 +209,29 @@ globus_l_dsi_rest_read_multipart(
                 state->need_header = true;
             }
             state->match_counter = 0;
+            state->boundary_buffer_offset = 0;
         }
         else if (state->match_counter > 0)
         {
             /*
-             * Partial boundary match, keep the data in the boundary
-             * buffer until we are certain
+             * Partial boundary match, call the user callback with the data
+             * before the beginning of the potential match, and save our matched
+             * data in the boundary buffer
              */
+            if (state->part_index != (size_t) -1)
+            {
+                globus_i_dsi_rest_read_part_t
+                                       *part = &state->parts[state->part_index];
+                part->data_read_callback(
+                    part->data_read_callback_arg,
+                    buffer,
+                    scanned - state->match_counter);
+            }
             memcpy(
                 state->boundary_buffer + state->boundary_buffer_offset,
-                buffer,
-                scanned);
-            state->boundary_buffer_offset += scanned;
+                ((char *) buffer) + scanned - state->match_counter,
+                state->match_counter);
+            state->boundary_buffer_offset += state->match_counter;
         }
         else
         {
