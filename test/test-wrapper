@@ -39,8 +39,9 @@ $ENV{TEMPDIR} = $tmpdir;
 
 my $server_args = "-no-fork -no-chdir -d 0 -auth-level 4 -p 0 -dsi dsi_rest:$tmpdir -threads 2 -l gridftp.$$.log";
 
-chomp($subject = `openssl x509 -subject -noout -in \${X509_USER_CERT:-testcred.cert}`);
-$subject =~ s/^subject= *//;
+chomp($subject = `openssl x509 -subject -noout -nameopt rfc2253,-dn_rev -in \${X509_USER_CERT:-testcred.cert}`);
+$subject =~ s/^subject= */\//;
+$subject =~ s/,/\//g;
 
 print STDERR "#Subject is $subject\n";
 print STDERR "#PATH is $ENV{PATH}\n";

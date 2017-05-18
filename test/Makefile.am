@@ -119,7 +119,7 @@ testcred.key:
 	echo "$$linkname" > $@
 
 gridmap: testcred.cert
-	subject=`openssl x509 -subject -noout -in testcred.cert | sed -e 's/subject= *//'` ; \
+	subject=`openssl x509 -subject -nameopt rfc2253,-dn_rev -noout -in testcred.cert | sed -e 's|subject= *|/|' -e 's|,|/|g'` ; \
 	echo "\"$$subject\" $${LOGNAME:-`id -un`}" > gridmap
 
 SUFFIXES = .key .req .cert .link
