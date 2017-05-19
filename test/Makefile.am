@@ -1,6 +1,13 @@
 EXTRA_DIST = uri-decode.c test-wrapper globus-dsi-rest-gridftp-test.pl openssl.cnf
 
-check_DATA = testcred.cert testcred.key testcred.link gridmap
+check_DATA = \
+	gridmap \
+        testcred.cakey \
+        testcred.cacert \
+        testcred.key \
+        testcred.cert \
+	testcred.link \
+	testcred.signing_policy
 
 check_PROGRAMS = \
 	add-header-test \
@@ -103,23 +110,38 @@ write_json_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 write_multipart_test_CPPFLAGS = $(AM_CPPFLAGS) $(GLOBUS_XIO_CFLAGS)
 write_multipart_test_LDFLAGS = $(AM_LDFLAGS) $(GLOBUS_XIO_LIBS)
 
-testcred.key:
-	umask 077; openssl genrsa 1024 > $@
+testcred.cacert: testcred.cnf
+	umask 077; $(OPENSSL) req -passout pass:globus -subj "/CN=ca" -new -x509 -extensions v3_ca -keyout $*.cakey -out $@ -config $<
 
-.key.req:
-	printf "NA\nNA\nNA\nNA\nNA\nNA\n\n\n\n" | openssl req -new -key $< -config $(srcdir)/openssl.cnf > $@
+.cacert.cakey:
+	:
+
+.cacert.link:
+	linkname="`$(OPENSSL) x509 -hash -noout -in $<`.0"; \
+	rm -f "$$linkname"; \
+	cp $< "$$linkname"; \
+        echo "$$linkname" > $@
+
+.link.signing_policy:
+	echo 01 > $*.srl
+	linkname=`cat $<`; \
+	policyfile=$${linkname%.0}.signing_policy; \
+	echo "access_id_CA      X509         '/CN=ca'" > $${policyfile}; \
+	echo "pos_rights        globus        CA:sign" >> $${policyfile}; \
+	echo "cond_subjects     globus       '\"/*\"'" >> $${policyfile}; \
+	echo $${policyfile} >> $@
+
+testcred.key:
+	umask 077; $(OPENSSL) genrsa 1024 > $@
+
+testcred.req: testcred.key testcred.signing_policy
+	$(OPENSSL) req -subj "/CN=test" -new -config $*.cnf -key $< > $@
 
 .req.cert:
-	umask 077; openssl x509 -req -days 365 -in testcred.req -signkey testcred.key > $@
-
-.cert.link:
-	linkname="$$(openssl x509 -hash -noout -in testcred.cert).0"; \
-	rm -f "$$linkname"; \
-	cp testcred.cert "$$linkname" ; \
-	echo "$$linkname" > $@
-
+	umask 022; $(OPENSSL) x509 -passin pass:globus -req -days 365 -in $< -CA $*.cacert -CAkey $*.cakey > $@
 gridmap: testcred.cert
 	subject=`openssl x509 -subject -nameopt rfc2253,-dn_rev -noout -in testcred.cert | sed -e 's|subject= *|/|' -e 's|,|/|g'` ; \
 	echo "\"$$subject\" $${LOGNAME:-`id -un`}" > gridmap
 
+CLEANFILES=$(check_DATA)
 SUFFIXES = .key .req .cert .link

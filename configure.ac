@@ -2,7 +2,7 @@ AC_PREREQ([2.60])
 
 AC_INIT(
     [globus_dsi_rest],
-    [0.31],
+    [0.32],
     [https://github.com/globus/globus-dsi-rest/issues])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -24,6 +24,8 @@ PKG_CHECK_MODULES([GLOBUS_XIO], [globus-xio])
 PKG_CHECK_MODULES([OPENSSL], [openssl])
 PKG_CHECK_MODULES([JANSSON], [jansson])
 
+
+AC_PATH_PROG([OPENSSL], openssl)
 AC_PATH_PROG([DOXYGEN], doxygen)
 AM_CONDITIONAL([ENABLE_DOXYGEN], [test "$DOXYGEN" != ""])
 
@@ -31,4 +33,5 @@ LIBCURL_CHECK_CONFIG
 
 AC_CONFIG_FILES([Makefile test/Makefile version.h Doxyfile])
 AC_CONFIG_FILES([globus-dsi-rest.pc])
+AC_CONFIG_FILES([test/testcred.cnf])
 AC_OUTPUT
