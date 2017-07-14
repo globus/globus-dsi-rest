@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.32
+Version:	0.33
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Fri Jul 14 2017 Globus Toolkit <support@globus.org> - 0.33-1
+- Fix leak when using gridftp_ops
+
 * Fri May 19 2017 Globus Toolkit <support@globus.org> - 0.32-1
 - More test script fixes to use a CA certificate
 

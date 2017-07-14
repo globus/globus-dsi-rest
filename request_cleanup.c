@@ -104,6 +104,13 @@ globus_l_dsi_rest_request_cleanup_write_part(
 
         globus_mutex_destroy(&arg->mutex);
         globus_cond_destroy(&arg->cond);
+        while (arg->free_buffers != NULL)
+        {
+            globus_i_dsi_rest_buffer_t *next = arg->free_buffers->next;
+
+            free(arg->free_buffers);
+            arg->free_buffers = next;
+        }
         free(arg);
         part->data_write_callback_arg = NULL;
     }
@@ -159,6 +166,13 @@ globus_l_dsi_rest_request_cleanup_read_part(
 
         globus_mutex_destroy(&arg->mutex);
         globus_cond_destroy(&arg->cond);
+        while (arg->free_buffers != NULL)
+        {
+            globus_i_dsi_rest_buffer_t *next = arg->free_buffers->next;
+
+            free(arg->free_buffers);
+            arg->free_buffers = next;
+        }
         free(arg);
         read_part->data_read_callback_arg = NULL;
     }
