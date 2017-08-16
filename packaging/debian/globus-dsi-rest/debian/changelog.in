@@ -1,5 +1,11 @@
 globus-dsi-rest (0.33-1+gt6.@distro@) @distro@; urgency=low
 
+  * Fix crash when reusing multipart args between requests
+
+ -- Globus Toolkit <support@globus.org>  Wed, 16 Aug 2017 10:37:21 -0400
+
+globus-dsi-rest (0.33-1+gt6.@distro@) @distro@; urgency=low
+
   * Fix leak when using gridftp_ops
 
  -- Globus Toolkit <support@globus.org>  Fri, 14 Jul 2017 16:33:43 -0400

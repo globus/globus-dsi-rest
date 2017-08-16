@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.33
+Version:	0.34
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Wed Aug 16 2017 Globus Toolkit <support@globus.org> - 0.34-1
+- Fix crash when reusing multipart args between requests
+
 * Fri Jul 14 2017 Globus Toolkit <support@globus.org> - 0.33-1
 - Fix leak when using gridftp_ops
 

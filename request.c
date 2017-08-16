@@ -355,6 +355,7 @@ globus_l_dsi_rest_prepare_write_callbacks(
     if (result != GLOBUS_SUCCESS)
     {
         free(current_part->headers.key_value);
+        current_part->headers.key_value = NULL;
     }
 headers_alloc_fail:
     GlobusDsiRestExitResult(result);
@@ -496,6 +497,7 @@ globus_l_dsi_rest_prepare_write_multipart_callback(
 part_prepare_fail:
 add_part_header_fail:
         free(multipart_write_arg->boundary);
+        multipart_write_arg->boundary = NULL;
     }
 boundary_malloc_fail:
     GlobusDsiRestExitResult(result);
