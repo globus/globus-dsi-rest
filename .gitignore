@@ -10,5 +10,6 @@ Doxyfile
 *.o
 *.lo
 *.la
+*.save
 .*.sw*
 TAGS

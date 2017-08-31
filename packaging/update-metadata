@@ -1,0 +1,100 @@
+#! /usr/bin/python
+
+import os
+import re
+import subprocess
+import sys
+import time
+
+def get_version(topdir):
+    configure = os.path.join(topdir, "configure")
+    configure_ac = configure + ".ac"
+
+    if os.stat(configure).st_mtime < os.stat(configure_ac).st_mtime:
+        os.system("cd {topdir}; autoreconf -i".format(topdir=topdir))
+
+    p = subprocess.Popen([configure, '--version'], stdout=subprocess.PIPE)
+    out, _ = p.communicate()
+    version = out.split("\n")[0].split(" ")[-1]
+
+    return version
+
+def update_rpm_changelog(topdir, version, changes):
+    rpm_changelog_entry = (
+        "* %a %b %d %G  Globus Toolkit <support@globus.org> - {version}-1\n"
+        "{entry}\n\n")
+    rpm_spec = os.path.join(
+        topdir,
+        "packaging",
+        "fedora",
+        "globus-dsi-rest.spec")
+    rpm_spec_tmp = rpm_spec + ".tmp"
+    rpm_spec_save = rpm_spec + ".save"
+
+    entry = "\n".join([
+        ("- {line}".format(line=line))
+        for line in changes.split("\n")])
+
+    with open(rpm_spec) as spec_in:
+        with open(rpm_spec_tmp, "w") as spec_out:
+            for line in spec_in:
+                if re.match("^\s*Version:\s*[0-9.]+\s*$", line):
+                    line = "Version:\t{version}\n".format(version=version)
+                elif re.match("^%changelog\s*$", line):
+                    spec_out.write(line)
+                    line = time.strftime(
+                        rpm_changelog_entry.format(
+                            version=version,
+                            entry=entry),
+                            time.localtime())
+                spec_out.write(line)
+    os.rename(rpm_spec, rpm_spec_save)
+    os.rename(rpm_spec_tmp, rpm_spec)
+
+def update_deb_changelog(topdir, version, changes):
+    deb_changelog_entry = (
+    "globus-dsi-rest ({version}-1+gt6.@distro@) "
+    "@distro@; urgency=low\n"
+    "\n"
+    "{entry}\n"
+    "\n"
+    " -- Globus Toolkit <support@globus.org>  %a, %d %b %G %T %z\n\n")
+
+    deb_changelog = os.path.join(
+        topdir,
+        "packaging",
+        "debian",
+        "globus-dsi-rest",
+        "debian",
+        "changelog.in")
+    deb_changelog_tmp = deb_changelog + ".tmp"
+    deb_changelog_save = deb_changelog + ".save"
+
+    entry = "\n".join([
+        ("  * {line}".format(line=line))
+        for line in changes.split("\n")])
+
+    with open(deb_changelog) as changelog_in:
+        with open(deb_changelog_tmp, "w") as changelog_out:
+            changelog_out.write(
+                time.strftime(
+                    deb_changelog_entry.format(
+                        version=version,
+                        entry=entry),
+                    time.localtime()))
+            changelog_out.write(changelog_in.read())
+
+    os.rename(deb_changelog, deb_changelog_save)
+    os.rename(deb_changelog_tmp, deb_changelog)
+
+def main(args):
+    topdir = os.path.join(os.path.dirname(__file__), '..')
+    changes = "\n".join(args[1:])
+
+    version = get_version(topdir)
+
+    update_rpm_changelog(topdir, version, changes)
+    update_deb_changelog(topdir, version, changes)
+
+if __name__ == '__main__':
+    main(sys.argv)
