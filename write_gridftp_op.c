@@ -56,6 +56,7 @@ globus_l_dsi_rest_write_gridftp_op(
     globus_i_dsi_rest_gridftp_op_arg_t *gridftp_op_arg = write_callback_arg;
     globus_result_t                     result = GLOBUS_SUCCESS;
     size_t                              buffer_filled = 0;
+    off_t                               start_offset = 0;
     globus_i_dsi_rest_buffer_t         *rest_buffer;
 
     GlobusDsiRestEnter();
@@ -67,6 +68,7 @@ globus_l_dsi_rest_write_gridftp_op(
         gridftp_op_arg->result = result;
     }
 
+    start_offset = gridftp_op_arg->offset;
     /*
      * If this file section is completely read, we don't need to bother with
      * registering reads
@@ -85,7 +87,11 @@ globus_l_dsi_rest_write_gridftp_op(
         int                             currently_pending = 0;
         globus_off_t                    bytes_pending = 0;
 
-        globus_l_dsi_rest_write_register_reads(gridftp_op_arg);
+        result = globus_l_dsi_rest_write_register_reads(gridftp_op_arg);
+        if (gridftp_op_arg->result == GLOBUS_SUCCESS)
+        {
+            gridftp_op_arg->result = result;
+        }
 
         globus_l_dsi_rest_count_buffers(
                 gridftp_op_arg->registered_buffers,
@@ -175,6 +181,17 @@ globus_l_dsi_rest_write_gridftp_op(
         }
     }
 done:
+    GlobusDsiRestDebug(
+        "op=%p "
+        "start_offset=%"PRIu64" "
+        "result=%#x "
+        "eof=%s "
+        "bytes=%zu\n",
+        (void *) gridftp_op_arg->op,
+        (uint64_t) start_offset,
+        gridftp_op_arg->result,
+        gridftp_op_arg->eof ? "true" : "false",
+        buffer_filled);
     globus_mutex_unlock(&gridftp_op_arg->mutex);
 
     *amount_copied = buffer_filled;
@@ -458,6 +475,8 @@ globus_l_dsi_rest_write_register_reads(
                     gridftp_op_arg);
             if (result != GLOBUS_SUCCESS)
             {
+                buffer->next = gridftp_op_arg->free_buffers;
+                gridftp_op_arg->free_buffers = buffer;
                 goto register_fail;
             }
 
@@ -471,7 +490,7 @@ globus_l_dsi_rest_write_register_reads(
 
 register_fail:
 buffer_fail:
-    GlobusDsiRestExit();
+    GlobusDsiRestExitResult(result);
     return result;
 }
 /* globus_l_dsi_rest_write_register_reads() */

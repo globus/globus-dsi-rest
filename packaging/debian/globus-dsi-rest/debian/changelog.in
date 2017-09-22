@@ -1,3 +1,10 @@
+globus-dsi-rest (0.36-1+gt6.@distro@) @distro@; urgency=low
+
+  * Fix leaks
+  * Handle error registering GridFTP reads
+
+ -- Globus Toolkit <support@globus.org>  Fri, 22 Sep 2017 14:40:23 -0400
+
 globus-dsi-rest (0.35-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix upload byte counting

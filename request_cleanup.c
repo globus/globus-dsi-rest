@@ -126,6 +126,7 @@ globus_l_dsi_rest_request_cleanup_write_part(
         free(arg->boundary);
         free(arg->current_boundary);
         free(arg->parts);
+        free(arg);
     }
 }
 /* globus_l_dsi_rest_request_cleanup_write_part() */
@@ -198,6 +199,9 @@ globus_l_dsi_rest_request_cleanup_read_part(
 
         free(arg->boundary_buffer);
         arg->boundary_buffer = NULL;
+
+        free(arg->header_buffer);
+        arg->header_buffer = NULL;
 
         free(arg);
 
