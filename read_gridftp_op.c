@@ -126,6 +126,11 @@ globus_l_dsi_rest_read_gridftp_op(
             result = globus_l_dsi_rest_send_pending(gridftp_op_arg);
             if (result != GLOBUS_SUCCESS)
             {
+                GlobusDsiRestDebug(
+                    "send_pending_result=%#x "
+                    "eof=%s\n",
+                    result,
+                    eof ? "true" : "false");
                 goto send_fail;
             }
         }
@@ -202,6 +207,12 @@ globus_l_dsi_rest_send_pending(
 
         if (result != GLOBUS_SUCCESS)
         {
+            char * msg = globus_error_print_friendly(globus_error_peek(result));
+	    GlobusDsiRestDebug(
+		    "register_write op=%p "
+		    "result=%s\n",
+		    gridftp_op_arg->op,
+		    msg != NULL ? msg : "UNKNOWN");
             if (gridftp_op_arg->result == GLOBUS_SUCCESS)
             {
                 gridftp_op_arg->result = result;

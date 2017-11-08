@@ -1,3 +1,9 @@
+globus-dsi-rest (0.37-1+gt6.@distro@) @distro@; urgency=low
+
+  * Fix crash when pending buffers are registered and an error occurs
+
+ -- Globus Toolkit <support@globus.org>  Wed, 08 Nov 2017 18:13:01 +0000
+
 globus-dsi-rest (0.36-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix leaks

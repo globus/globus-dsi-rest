@@ -165,6 +165,18 @@ globus_l_dsi_rest_request_cleanup_read_part(
         globus_i_dsi_rest_gridftp_op_arg_t
                                        *arg = read_part->data_read_callback_arg;
 
+        globus_mutex_lock(&arg->mutex);
+        while (arg->registered_buffers_count != 0)
+        {
+            GlobusDsiRestDebug(
+                "read_gridftp_op op=%p "
+                "registered_buffers_count=%d\n",
+                (void *) arg->op,
+                arg->registered_buffers_count);
+
+            globus_cond_wait(&arg->cond, &arg->mutex);
+        }
+        globus_mutex_unlock(&arg->mutex);
         globus_mutex_destroy(&arg->mutex);
         globus_cond_destroy(&arg->cond);
         while (arg->free_buffers != NULL)
