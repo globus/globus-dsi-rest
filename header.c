@@ -44,9 +44,9 @@ globus_i_dsi_rest_header(
 
         GlobusDsiRestInfo("%s", buffer);
 
-        int scans = sscanf(bufferstring, "HTTP/%*s %d %64s",
-                &request->response_code,
-                request->response_reason);
+        int scans = sscanf(bufferstring, "HTTP/%*s %d %64[^\r]",
+            &request->response_code,
+            request->response_reason);
 
         if (scans != 2)
         {
