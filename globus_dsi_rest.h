@@ -784,6 +784,18 @@ extern globus_dsi_rest_response_t const globus_dsi_rest_response;
 
 extern globus_module_descriptor_t       globus_i_dsi_rest_module;
 
+enum
+{
+    GLOBUS_DSI_REST_ERROR_PARAMETER = 1,
+    GLOBUS_DSI_REST_ERROR_MEMORY,
+    GLOBUS_DSI_REST_ERROR_PARSE,
+    GLOBUS_DSI_REST_ERROR_CURL,
+    GLOBUS_DSI_REST_ERROR_JSON,
+    GLOBUS_DSI_REST_ERROR_TIME_OUT,
+    GLOBUS_DSI_REST_ERROR_THREAD_FAIL,
+    GLOBUS_DSI_REST_ERROR_UNEXPECTED_DATA,
+};
+
 #define GLOBUS_DSI_REST_MODULE (&globus_i_dsi_rest_module)
 
 #ifdef __cplusplus

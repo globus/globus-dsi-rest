@@ -2,7 +2,7 @@ AC_PREREQ([2.60])
 
 AC_INIT(
     [globus_dsi_rest],
-    [0.37],
+    [0.38],
     [https://github.com/globus/globus-dsi-rest/issues])
 
 AC_CONFIG_MACRO_DIR([m4])

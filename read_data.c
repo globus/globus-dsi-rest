@@ -69,6 +69,17 @@ globus_i_dsi_rest_read_data(
             funlockfile(fp);
             fp = NULL;
         }
+        GlobusDsiRestDebug(
+            "response_code=%d "
+            "result=%#x "
+            "data_processed=%zu "
+            "request_bytes_uploaded=%"GLOBUS_OFF_T_FORMAT" "
+            "response_bytes_downloaded=%"GLOBUS_OFF_T_FORMAT"\n",
+            request->response_code,
+            result,
+            processed,
+            request->request_bytes_uploaded,
+            request->response_bytes_downloaded);
     }
     else
     {

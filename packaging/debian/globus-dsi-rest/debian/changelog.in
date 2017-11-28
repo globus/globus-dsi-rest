@@ -1,3 +1,11 @@
+globus-dsi-rest (0.38-1+gt6.@distro@) @distro@; urgency=low
+
+  * Improve testing error for restartability.
+  * Improve logging
+  * When HTTP GET returns an error, don't send it on a data channel
+
+ -- Globus Toolkit <support@globus.org>  Tue, 28 Nov 2017 14:10:23 +0000
+
 globus-dsi-rest (0.37-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix crash when pending buffers are registered and an error occurs

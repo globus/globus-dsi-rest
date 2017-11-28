@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.37
+Version:	0.38
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,11 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Tue Nov 28 2017  Globus Toolkit <support@globus.org> - 0.38-1
+- Improve testing error for restartability.
+- Improve logging
+- When HTTP GET returns an error, don't send it on a data channel
+
 * Wed Nov 08 2017  Globus Toolkit <support@globus.org> - 0.37-1
 - Fix crash when pending buffers are registered and an error occurs
 

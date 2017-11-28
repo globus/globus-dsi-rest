@@ -60,7 +60,35 @@ globus_i_dsi_rest_write_data(
     }
     request->response_bytes_downloaded += (size * nmemb);
 
-    if (request->read_part.data_read_callback != NULL)
+    GlobusDsiRestDebug(
+        "response_code=%d "
+        "data_processed=%zu "
+        "request_bytes_uploaded=%"GLOBUS_OFF_T_FORMAT" "
+        "response_bytes_downloaded=%"GLOBUS_OFF_T_FORMAT"\n",
+        request->response_code,
+        data_processed,
+        request->request_bytes_uploaded,
+        request->response_bytes_downloaded);
+
+    if (request->response_code >= 300
+        && request->read_part.data_read_callback
+            == globus_dsi_rest_read_gridftp_op)
+    {
+        globus_object_t                *error_obj = NULL;
+
+        /* Don't write non-2xy content to gridftp data channel */
+        error_obj = GlobusDsiRestErrorUnexpectedDataObject(
+            ptr, (int)size*nmemb);
+
+        globus_error_set_long_desc(
+            error_obj,
+            "%.*s",
+            (int) (size * nmemb),
+            ptr);
+
+        result = globus_error_put(error_obj);
+    }
+    else if (request->read_part.data_read_callback != NULL)
     {
         result = request->read_part.data_read_callback(
                 request->read_part.data_read_callback_arg,
