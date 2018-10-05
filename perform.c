@@ -41,8 +41,10 @@ globus_i_dsi_rest_perform(
 
     if (request->complete_callback != NULL)
     {
+        globus_thread_t                 thr;
+
         rc = globus_thread_create(
-                &request->thread,
+                &thr,
                 NULL,
                 globus_l_dsi_rest_perform_thread,
                 request);

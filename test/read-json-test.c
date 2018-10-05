@@ -176,6 +176,7 @@ int main()
         {
             rc++;
         }
+        json_decref(json_out);
     }
 
     free(contact_string);

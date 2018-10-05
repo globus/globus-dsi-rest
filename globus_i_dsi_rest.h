@@ -193,8 +193,6 @@ struct globus_i_dsi_rest_request_s
     off_t                               request_bytes_uploaded;
     off_t                               response_bytes_downloaded;
 
-    globus_thread_t                     thread;
-
     globus_i_dsi_rest_write_part_t      write_part;
     globus_i_dsi_rest_read_part_t       read_part;
 

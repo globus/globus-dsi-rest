@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.38
+Version:	0.39
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Fri Oct 05 2018  Globus Toolkit <support@globus.org> - 0.39-1
+- Fix race on thread creation
+- Clean up memory usage in tests
+
 * Tue Nov 28 2017  Globus Toolkit <support@globus.org> - 0.38-1
 - Improve testing error for restartability.
 - Improve logging

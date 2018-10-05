@@ -240,6 +240,11 @@ int main()
         {
             rc++;
         }
+        for (size_t j = 0; j < response_arg.desired_headers.count; j++)
+        {
+            char *value = (char *) response_arg.desired_headers.key_value[j].value;
+            free(value);
+        }
     }
 
     free(contact_string);

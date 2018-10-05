@@ -45,6 +45,10 @@ main()
             rc++;
         }
     }
+    for (size_t i = 0; i < cases; i++)
+    {
+        globus_i_dsi_rest_handle_release(requests[i].handle);
+    }
 
     return rc;
 }

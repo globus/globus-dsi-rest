@@ -1,3 +1,10 @@
+globus-dsi-rest (0.39-1+gt6.@distro@) @distro@; urgency=low
+
+  * Fix race on thread creation
+  * Clean up memory usage in tests
+
+ -- Globus Toolkit <support@globus.org>  Fri, 05 Oct 2018 09:46:41 -0400
+
 globus-dsi-rest (0.38-1+gt6.@distro@) @distro@; urgency=low
 
   * Improve testing error for restartability.

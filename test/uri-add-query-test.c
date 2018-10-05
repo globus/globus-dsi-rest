@@ -4,7 +4,6 @@
 int
 main()
 {
-    char *encoded = NULL;
     int rc = 0;
     char *names[] = {
         "no-params",
@@ -68,6 +67,7 @@ main()
         bool ok = true;
         bool key_ok = true;
         bool val_ok = true;
+        char *encoded = NULL;
 
         globus_dsi_rest_uri_add_query(
             "https://rest.example.org/resource",
@@ -227,7 +227,7 @@ main()
                 names[test_cases_array.count],
                 key_ok ? "" : " key encoding error",
                 val_ok ? "" : " value encoding error");
-                
+        free(encoded);
     }
 
 
