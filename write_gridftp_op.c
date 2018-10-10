@@ -123,6 +123,15 @@ globus_l_dsi_rest_write_gridftp_op(
             currently_pending,
             bytes_pending);
 
+        if (gridftp_op_arg->result != GLOBUS_SUCCESS
+            && gridftp_op_arg->registered_buffers == NULL)
+        {
+            /* If globus_l_dsi_rest_write_register_reads() fails and no
+             * buffers are registered, we have reached a state where the
+             * signal can not happen.
+             */
+            break;
+        }
         globus_cond_wait(&gridftp_op_arg->cond, &gridftp_op_arg->mutex);
     }
 

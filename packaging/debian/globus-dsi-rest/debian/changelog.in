@@ -1,3 +1,9 @@
+globus-dsi-rest (0.40-1+gt6.@distro@) @distro@; urgency=low
+
+  * Fix deadlock when write_gridftp_op is unable to register any reads
+
+ -- Globus Toolkit <support@globus.org>  Wed, 10 Oct 2018 18:45:59 +0000
+
 globus-dsi-rest (0.39-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix race on thread creation
