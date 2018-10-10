@@ -92,7 +92,7 @@ GridFTP DSI REST Helper API Documentation
 
 %configure --disable-static --docdir=%{_docdir}/%{name} --includedir=%{_includedir}/globus --sysconfdir=%{_sysconfdir}/globus --enable-silent-rules -q
 
-make %{?_smp_mflags} %{GLOBUS_FLAGS}
+make %{?_smp_mflags} %{?GLOBUS_FLAGS}
 %install
 rm -rf $RPM_BUILD_ROOT
 
