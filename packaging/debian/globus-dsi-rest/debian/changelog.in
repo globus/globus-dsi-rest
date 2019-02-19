@@ -1,3 +1,9 @@
+globus-dsi-rest (0.41-1+gt6.@distro@) @distro@; urgency=low
+
+  * Prevent Transfer-Encoding:chunked when Content-Length header is present
+
+ -- Globus Toolkit <support@globus.org>  Tue, 19 Feb 2019 14:36:58 +0000
+
 globus-dsi-rest (0.40-1+gt6.@distro@) @distro@; urgency=low
 
   * Fix deadlock when write_gridftp_op is unable to register any reads

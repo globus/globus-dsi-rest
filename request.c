@@ -189,7 +189,7 @@ globus_dsi_rest_request(
         || strcmp(method, "PUT") == 0
         || callbacks->data_write_callback != NULL)
     {
-        for (size_t i = 0; i < (headers != NULL) ? headers->count : 0; i++)
+        for (size_t i = 0; i < ((headers != NULL) ? headers->count : 0); i++)
         {
             if (strcasecmp(headers->key_value[i].key, "Transfer-Encoding") == 0
                 || strcasecmp(headers->key_value[i].key, "Content-Length") == 0)
