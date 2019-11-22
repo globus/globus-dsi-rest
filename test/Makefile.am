@@ -132,7 +132,7 @@ testcred.cacert: testcred.cnf
 	echo $${policyfile} >> $@
 
 testcred.key:
-	umask 077; $(OPENSSL) genrsa 1024 > $@
+	umask 077; $(OPENSSL) genrsa 2048 > $@
 
 testcred.req: testcred.key testcred.signing_policy
 	$(OPENSSL) req -subj "/CN=test" -new -config $*.cnf -key $< > $@

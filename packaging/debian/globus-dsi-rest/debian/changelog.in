@@ -1,3 +1,9 @@
+globus-dsi-rest (0.42-1+gt6.@distro@) @distro@; urgency=low
+
+  * update test cred
+
+ -- Globus Toolkit <support@globus.org>  Fri, 22 Nov 2019 08:32:13 +0000
+
 globus-dsi-rest (0.41-1+gt6.@distro@) @distro@; urgency=low
 
   * Prevent Transfer-Encoding:chunked when Content-Length header is present

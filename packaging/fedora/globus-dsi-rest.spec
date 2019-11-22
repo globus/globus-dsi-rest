@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.41
+Version:	0.42
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Fri Nov 22 2019  Globus Toolkit <support@globus.org> - 0.42-1
+- update test cred
+
 * Tue Feb 19 2019  Globus Toolkit <support@globus.org> - 0.41-1
 - Prevent Transfer-Encoding:chunked when Content-Length header is present
 
