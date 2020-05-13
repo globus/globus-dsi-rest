@@ -80,6 +80,11 @@ globus_i_dsi_rest_handle_get(
     {
         goto curlopt_fail;
     }
+    rc = curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+    if (rc != CURLE_OK)
+    {
+        goto curlopt_fail;
+    }
 #ifndef LIBCURL_NO_CURLPROTO
     rc = curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS|CURLPROTO_HTTP);
     if (rc != CURLE_OK)

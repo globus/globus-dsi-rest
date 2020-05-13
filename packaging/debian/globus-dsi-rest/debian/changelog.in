@@ -1,3 +1,9 @@
+globus-dsi-rest (0.43-1+gt6.@distro@) @distro@; urgency=low
+
+  * use http/1.1 on new versions of libcurl that default to http/2
+
+ -- Globus Toolkit <support@globus.org>  Wed, 13 May 2020 02:42:55 -0500
+
 globus-dsi-rest (0.42-1+gt6.@distro@) @distro@; urgency=low
 
   * update test cred

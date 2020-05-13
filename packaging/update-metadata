@@ -15,7 +15,7 @@ def get_version(topdir):
 
     p = subprocess.Popen([configure, '--version'], stdout=subprocess.PIPE)
     out, _ = p.communicate()
-    version = out.split("\n")[0].split(" ")[-1]
+    version = out.decode("utf-8").split("\n")[0].split(" ")[-1]
 
     return version
 

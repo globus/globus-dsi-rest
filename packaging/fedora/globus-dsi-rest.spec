@@ -1,6 +1,6 @@
 Name:           globus-dsi-rest
 %global _name %(tr - _ <<< %{name})
-Version:	0.42
+Version:	0.43
 Release:        1%{?dist}
 Vendor:		Globus Support
 Summary:        GridFTP DSI REST Helper API
@@ -127,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_docdir}/globus-dsi-rest/html/*
 
 %changelog
+* Wed May 13 2020  Globus Toolkit <support@globus.org> - 0.43-1
+- use http/1.1 on new versions of libcurl that default to http/2
+
 * Fri Nov 22 2019  Globus Toolkit <support@globus.org> - 0.42-1
 - update test cred
 
