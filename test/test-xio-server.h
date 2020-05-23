@@ -31,8 +31,6 @@ typedef globus_result_t (*globus_dsi_rest_route_t)(
     size_t *response_body_length,
     globus_dsi_rest_key_array_t *headers);
 
-globus_hashtable_t server_routes;
-
 globus_result_t
 globus_dsi_rest_test_server_init(
     char                              **contact);

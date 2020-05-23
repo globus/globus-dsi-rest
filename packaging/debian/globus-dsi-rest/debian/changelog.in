@@ -1,4 +1,4 @@
-globus-dsi-rest (0.43-1+gt6.@distro@) @distro@; urgency=low
+globus-dsi-rest (0.45-1+gt6.@distro@) @distro@; urgency=low
 
   * use http/1.1 on new versions of libcurl that default to http/2
 
