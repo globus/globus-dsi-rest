@@ -22,10 +22,10 @@
 #include "globus_xio.h"
 #include "globus_xio_http.h"
 
-globus_mutex_t server_done_mutex;
-globus_cond_t server_done_cond;
-bool server_stop;
-bool server_done;
+static globus_mutex_t server_done_mutex;
+static globus_cond_t server_done_cond;
+static bool server_stop;
+static bool server_done;
 
 typedef globus_result_t (*globus_dsi_rest_route_t)(
     void *route_arg,
@@ -36,7 +36,7 @@ typedef globus_result_t (*globus_dsi_rest_route_t)(
     size_t *response_body_length,
     globus_dsi_rest_key_array_t *headers);
 
-globus_hashtable_t server_routes;
+static globus_hashtable_t server_routes;
 
 typedef struct
 {
@@ -46,10 +46,10 @@ typedef struct
 }
 globus_dsi_rest_route_entry_t;
 
-globus_xio_server_t                     xio_server;
-globus_xio_stack_t                      xio_stack;
-globus_xio_driver_t                     tcp_driver;
-globus_xio_driver_t                     http_driver;
+static globus_xio_server_t                     xio_server;
+static globus_xio_stack_t                      xio_stack;
+static globus_xio_driver_t                     tcp_driver;
+static globus_xio_driver_t                     http_driver;
 
 static
 void *server_thread(void *arg);

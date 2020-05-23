@@ -22,8 +22,6 @@
 #include "globus_dsi_rest.h"
 #include "test-xio-server.h"
 
-globus_xio_driver_t                     http_driver;
-
 struct json_reader_s
 {
     char                                buffer[256];
