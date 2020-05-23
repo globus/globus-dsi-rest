@@ -6,7 +6,7 @@ pcdir = $(libdir)/pkgconfig
 lib_LTLIBRARIES = libglobus_dsi_rest.la
 pc_DATA = globus-dsi-rest.pc
 include_HEADERS = globus_dsi_rest.h
-doc_DATA = GLOBUS_LICENSE
+doc_DATA = GLOBUS_LICENSE README.md
 
 AM_CPPFLAGS = \
 	$(GLOBUS_GRIDFTP_SERVER_CFLAGS) \
